@@ -1,0 +1,197 @@
+
+
+
+
+
+{% extends 'base.html' %} 
+
+{% block content %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Markers Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+   
+    <!-- Leaflet Draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+
+  </head>
+  <body  style="background-color:#e9d58b; ">
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        <div class="col-3">
+          <!-- Sidebar -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title" style="text-align:center; color:rgb(51, 77, 4);">Projects</h5>
+             </div>
+             <div class="card-body">
+              <div class="card mb-2">
+                <div class="card-body">
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;' onclick="location.href='{% url 'stocker_polygone' %}'">Add New Project</button>
+                </div>
+              </div>
+              {% for polygon in polygons %}
+              <div class="card mb-2 " style="background-color: #d4d6d8; display: flex; flex-direction: column;">
+                <div class="card-body text-vert">
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ polygon.nom }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ polygon.client }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ polygon.idPolygone }}</h6>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' polygon.idPolygone %}'">View all detail</button>
+                </div>
+              </div>
+              {% endfor %}
+             </div>
+             </div>
+            </div>
+         
+          
+
+           <form method="POST">
+             {% csrf_token %}
+               
+             <h1>Details of : {{ polygon.nom }}</h1>
+
+                  
+                    <div class="row justify-content-left align-items-center">
+                      <div class="col-md-4 mt-5">
+                          <div class="card">
+                              <div class="card-header text-center">
+                                  <h5>Client Information</h5>
+                              </div>
+                              <div class="card-body">
+                                  <p><strong>ID: </strong>{{ polygon.idPolygone }}</p>
+                                  <p><strong>Client: </strong>{{ polygon.client }}</p>
+                                  <p><strong>Status: </strong>{{ polygon.status }}</p>
+                              </div>
+                          </div>
+                      </div>
+                  
+                      <div class="col-md-4 mt-5">
+                          <div class="card">
+                              <div class="card-header text-center">
+                                  
+                                  <h5><a href="{% url 'update' %}">Weather Information</a></h5>
+                              </div>
+                              <div class="card-body"  id="weather-info" >
+                                  <p><strong>Temperature:</strong> {{ parm.temperature }}°C</p>
+                                  <p><strong>Humidity:</strong> {{ parm.humidity }}%</p>
+                                  <p><strong>Wind Speed:</strong> {{ parm.wind }} km/h</p>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  
+                 
+
+                 <div class="col-md-6">
+                  <h2>Map</h2>
+                  
+                  <div class='col-6 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+                    <div class="leaflet-control"></div>
+                 </div>
+                
+
+                 
+               
+                 <label for="geom">Geometry:</label>
+                 <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
+
+                  <!-- <button class="btn btn-outline-primary my-2 my-sm-0" type="submit" value="save" style='width:30%'>
+                 save polygone
+                  </button> 
+                  <h5><a href="{% url 'update' %}">Click Here To See Hum and Temp</a></h5>-->
+    
+                
+                
+            </form>
+         
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+ <script src="{% static 'js/map.js' %}"></script>
+
+
+
+
+
+
+ <script>
+  var client = "{{ client }}";
+  var geojson_str = "{{ polygon.geom.json|escapejs }}";
+  var status = "{{ polygon.status }}";
+  var geojson = JSON.parse(geojson_str);
+  
+  // Define the colors for the polygon based on status
+  var color = status === "Risk" ? "red" : "green";
+
+  // Create a Leaflet map
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 10);
+
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+  
+  // Add the GeoJSON polygon to the map
+  
+  L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+  
+  // Add the client name to the page
+  document.getElementById('client').innerHTML = client;
+  </script>
+
+
+
+
+
+
+
+ <script>
+  $(document).ready(function(){
+      
+      setInterval(function(){
+        
+        $.ajax({
+          type:'GET',
+          url : "{% url 'getData' %}",
+          success: function(data) {
+                // update weather information in the DOM
+                $('#weather-info').html(
+                    '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
+                    '<p><strong>Humidity:</strong> ' + data.humidity + '%</p>' +
+                    '<p><strong>Wind Speed:</strong> ' + data.wind + ' km/h</p>'
+                );
+           
+
+          }
+        });
+      },1000);
+    });
+    
+
+ </script>
+ 
+  </body>
+</html>
+
+{% endblock %}

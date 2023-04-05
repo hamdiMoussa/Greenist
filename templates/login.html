@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {% block content %} {% load static %}
+
+<body class="bg-img" >
+
+ 
+ 
+ <div class="container" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+  <div class="row justify-content-center align-items-center">
+    <div class="col text-center">
+      <div class="card" style="width: 18rem; height: 30rem;">
+        <img src="{% static 'images/client.jpg' %}" class="card-img-top mx-auto d-block">
+        <br>
+        <div class="card-body">
+          <h5 class="card-title" style="color: #A26A25;">connect as client</h5>
+          <p class="card-text text-center">Description of Client privileges</p><br>
+          <a href="{% url 'home' %}" class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;'  >connection</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col text-center">
+      <div class="card" style="width: 18rem; height: 30rem;">
+        <img src="{% static 'images/sv.jpg' %}" class="card-img-top mx-auto d-block">
+        <div class="card-body">
+          <h5 class="card-title" style="color: #A26A25;">connect as supervisor</h5>
+          <p class="card-text">Description of Supervisor privileges</p>
+          <a href="{% url 'login_supervisor' %}" class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;'  >connection</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+ </div>
+</body>
+
+
+
+  
+
+   
+
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-6 mx-auto mt-5">
+      <div class="card">
+        <div class="card-header text-center">
+          <h5>Weather Information</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>City:</strong> {{ weather.city }}</p>
+          <p><strong>Temperature:</strong> {{ temp }}°C</p>
+          <p><strong>Humidity:</strong> {{ hum }}%</p>
+          <p><strong>Wind Speed:</strong> {{ wind }} km/h</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

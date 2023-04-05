@@ -1,0 +1,84 @@
+{% extends 'base.html' %} 
+
+{% block content %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Markers Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+   
+    <!-- Leaflet Draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+
+  </head>
+  <body  style="background-color:#e9d58b; ">
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        <div class="col-3">
+          <!-- Sidebar -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title" style="text-align:center; color:rgb(51, 77, 4);">Projects</h5>
+             </div>
+            <div class="card-body">
+              {% for polygon in polygons %}
+              <div class="card mb-2 " style="background-color: #d4d6d8; display: flex; flex-direction: column;">
+                <div class="card-body text-vert">
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ polygon.nom }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ polygon.client }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ polygon.idPolygone }}</h6>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' polygon.idPolygone %}'">View all detail</button>
+                </div>
+              </div>
+              {% endfor %}
+             </div>
+            </div>
+         </div>
+         
+          
+
+           <form method="POST">
+             {% csrf_token %}
+             <input type="text"  name="nom" style="margin-right: 375px;" placeholder="Prject name" /> 
+             <input type="text"  name="client" style="margin-right: 375px;" placeholder="Client name" /> 
+
+
+             
+             <div class='col-6 rounded ' id="mapid" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+                <div class="leaflet-control"></div>
+             </div>
+                
+             
+
+
+             <input type="text" id="points" name="points" style="margin-right: 375px;" /> 
+                 
+                  <!-- <button class="btn btn-outline-primary my-2 my-sm-0" type="submit" value="save" style='width:30%'>
+                 save polygone
+                  </button> 
+                  <h5><a href="{% url 'update' %}">Click Here To See Hum and Temp</a></h5>-->
+    
+             <button id="save-polygon-btn" class="btn btn-dark  "  style='width:30%; margin-top: 20px; background-color: #294c5b;'>Save </button>
+                
+            </form>
+         
+      </div>
+    </div>
+
+ <script src="{% static 'js/map.js' %}"></script>
+  </body>
+</html>
+
+{% endblock %}
