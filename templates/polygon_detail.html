@@ -26,6 +26,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
 
   </head>
   <body  style="background-color:#e9d58b; ">
@@ -84,12 +86,15 @@
                               <div class="card-header text-center">
                                   
                                   <h5><a href="{% url 'update' %}">Weather Information</a></h5>
+                                  
                               </div>
-                              <div class="card-body"  id="weather-info" >
-                                  <p><strong>Temperature:</strong> {{ parm.temperature }}°C</p>
-                                  <p><strong>Humidity:</strong> {{ parm.humidity }}%</p>
-                                  <p><strong>Wind Speed:</strong> {{ parm.wind }} km/h</p>
-                              </div>
+                              <div id="weather-info">
+                                <div class="card-body">
+                                    <p><strong>Temperature:</strong> {{ parm.temperature }}°C</p>
+                                    <p><strong>Humidity:</strong> {{ parm.humidity }}%</p>
+                                    <p><strong>Wind Speed:</strong> {{ parm.wind }} km/h</p>
+                                </div>
+                            </div>
                           </div>
                       </div>
                   </div>
@@ -167,29 +172,33 @@
 
 
  <script>
-  $(document).ready(function(){
-      
-      setInterval(function(){
-        
-        $.ajax({
-          type:'GET',
-          url : "{% url 'getData' %}",
-          success: function(data) {
-                // update weather information in the DOM
-                $('#weather-info').html(
-                    '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
-                    '<p><strong>Humidity:</strong> ' + data.humidity + '%</p>' +
-                    '<p><strong>Wind Speed:</strong> ' + data.wind + ' km/h</p>'
-                );
-           
-
-          }
-        });
-      },1000);
-    });
-    
-
- </script>
+   $(document).ready(function() {
+       setInterval(function() {
+           $.ajax({
+               url: "{% url 'update_weather' %}",
+               type: "GET",
+               success: function(data) {
+                   $('#weather-info').html(
+                       '<div class="card-body">' +
+                          '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
+                          '<p><strong>Humidity:</strong> ' + data.humidity + '%</p>' +
+                          '<p><strong>Wind Speed:</strong> ' + data.wind + ' km/h</p>' +
+                       '</div>'
+                   );
+               },
+               error: function(xhr, status, error) {
+                   console.log("An error occurred: " + xhr.status + " " + xhr.statusText);
+               }
+           });
+       }, 5000); // refresh every 5 seconds
+   });
+  </script>
+  
+  
+  
+  
+  
+  
  
   </body>
 </html>

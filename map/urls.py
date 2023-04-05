@@ -10,6 +10,6 @@ urlpatterns = [
     path('UPdate', views.start_mqtt, name='update'),
     path('polygon_detail/<int:id>/', views.polygon_detail, name='polygon_detail'),
    # path('get-polygon/<int:polygon_id>/', get_polygon, name='get_polygon'),
-    path('getData',views.update_weather,name='getData'),
+     path('update_weather/', views.update_weather, name='update_weather'),
     
 ]

@@ -111,12 +111,14 @@ def update_weather(request):
     # get updated weather information
     post = Node.objects.order_by('-IdNode').first()
 
-    # create a JSON response with the updated information
+    # create a dictionary with the updated information
     data = {
         'temperature': post.temperature,
         'humidity': post.humidity,
         'wind': post.wind,
     }
+
+    # return a JsonResponse with the updated data
     return JsonResponse(data)
 
 
