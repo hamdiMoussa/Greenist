@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+  <div class="container-fluid" style="background-color: #e9d58b;">
+    <div class="row flex-nowrap">
+      <div class="col-3">
+        <div class="card mb-3">
+          <div class="card-header">
+            <h5 class="card-title text-center" style="color: rgb(51, 77, 4);">Projects</h5>
+          </div>
+          <div class="card-body">
+            {% for project in projects %}
+            <div class="card mb-2 " style="background-color: #d4d6d8; display: flex; flex-direction: column;">
+              <div class="card-body text-vert">
+                <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ project.nom }}</h6>
+                <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ project.client }}</h6>
+                <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ project.idProject }}</h6>
+                <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' project.idProject %}'">View all detail</button>
+              </div>
+            </div>
+            {% endfor %}
+           </div>
+        </div>
+      </div>
+
+      <div class="col-md-9 mt-6">
+        <div class="card">
+          <div class="card-header text-center">
+            <h4>Step 2 - Add account</h4>
+          </div>
+          <div class="card-body">
+            <form method="POST" id="form">
+              {% csrf_token %}
+  
+                    <div class="row mb-3 " > 
+                      <div class="col" >
+                        <h4>Last Name</h4>
+                        {{ form.nom}}
+                        {% if form.nom.errors %}
+                        <strong class="text-danger" role="alert">{{ form.nom.errors }}</strong>
+                        {% endif %}
+                      </div>
+  
+                      <div class="col">
+                        <h4>Fist Name</h4>
+                        {{ form.prenom}}
+                        {% if form.prenom.errors %}
+                        <strong class="text-danger" role="alert">{{ form.prenom.errors }}</strong>
+                        {% endif %}
+                      </div>
+                    </div> 
+                      
+
+                    <div class="row">
+                      <div class="col">
+                        <h4>Pseudo</h4>
+                        {{ form.pseudo}}
+                        {% if form.pseudo.errors %}
+                        <strong class="text-danger" role="alert">{{ form.pseudo.errors }}</strong>
+                        {% endif %}
+                      </div>
+                      <div class="col">
+                        <h4>Phone</h4>
+                        {{ form.telephone }}
+                        {% if form.telephone.errors %}
+                        <strong class="text-danger" role="alert">{{ form.telephone.errors }}</strong>
+                        {% endif %}
+                      </div>
+                    </div>
+
+
+
+                    <div class="mb-3">
+                      <h4>Mail</h4>
+                      {{ form.email}}
+                      {% if form.email.errors %}
+                      <strong class="text-danger" role="alert">{{ form.email.errors }}</strong>
+                      {% endif %}
+                    </div>
+                    <div class="mb-3">
+                      <div class="col">
+                        <h4>Password</h4>
+                        {{ form.mot_de_passe}}
+                        {% if form.mot_de_passe.errors %}
+                        <strong class="text-danger" role="alert">{{ form.mot_de_passe.errors }}</strong>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="col">
+                        <h4>Password confirmation</h4>
+                        {{ form.confirmation_mot_de_passe}}
+                        {% if form.confirmation_mot_de_passe.errors %}
+                        <strong class="text-danger" role="alert">{{ form.confirmation_mot_de_passe.errors }}</strong>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="text-center">
+                      <button type="submit" class="btn btn-dark" style='width:30%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Next</button>
+                  </div>
+              </div>
+          </div>
+             
+             
+          </form>
+         
+      </div>
+    </div>
+
+ <script src="{% static 'js/map.js' %}"></script>
+  </body>
+</html>
+
+{% endblock %}

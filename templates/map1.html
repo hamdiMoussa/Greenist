@@ -51,26 +51,44 @@
 
            <form method="POST">
              {% csrf_token %}
-             <input type="text"  name="nom" style="margin-right: 375px;" placeholder="Prject name" /> 
-             <input type="text"  name="client" style="margin-right: 375px;" placeholder="Client name" /> 
+
+
+
+             <div class="col-md-9 mt-6">
+              <div class="card">
+                  <div class="card-header text-center">
+                      <h4>Step 3 - Add parcel</h4>
+                  </div>
+                  <div class="card-body">
+                      <div class="form-group">
+                      
+                          <div class='col-6 rounded ' id="mapid" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+                            <div class="leaflet-control"></div>
+                         </div>
+         
+                    
+                  
+                    <label for="geom">Geometry:</label>
+                    <input type="text" id="points" name="points" style="margin-right: 375px;" /> <br><br>
+                      </div>
+                      <button id="save-polygon-btn" class="btn btn-dark" style='width:30%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Next </button>
+                  </div>
+               </div>
+           </div>
+             
 
 
              
-             <div class='col-6 rounded ' id="mapid" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
-                <div class="leaflet-control"></div>
-             </div>
+
                 
              
 
 
-             <input type="text" id="points" name="points" style="margin-right: 375px;" /> 
+        
                  
-                  <!-- <button class="btn btn-outline-primary my-2 my-sm-0" type="submit" value="save" style='width:30%'>
-                 save polygone
-                  </button> 
-                  <h5><a href="{% url 'update' %}">Click Here To See Hum and Temp</a></h5>-->
+  
     
-             <button id="save-polygon-btn" class="btn btn-dark  "  style='width:30%; margin-top: 20px; background-color: #294c5b;'>Save </button>
+             
                 
             </form>
          

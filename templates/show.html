@@ -1,0 +1,107 @@
+
+
+
+
+
+{% extends 'base.html' %} 
+
+{% block content %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Markers Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+   
+    <!-- Leaflet Draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+
+  </head>
+  <body >
+    {% csrf_token %}
+    <div class='col-6 rounded ' id="map" style=" box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+        <div class="leaflet-control"></div>
+    </div>
+
+
+
+
+
+
+
+ <script src="{% static 'js/map.js' %}"></script>
+
+
+
+
+
+ <script>
+  var client = "{{ client }}";
+  var geojson_str = "{{ polygon.geom.json|escapejs }}";
+  var status = "{{ polygon.status }}";
+  var geojson = JSON.parse(geojson_str);
+
+  // Define the colors for the polygon based on status
+  var color = status === "Risk" ? "red" : "green";
+
+  // Create a Leaflet map
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 13);
+
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+  
+  // Add the GeoJSON polygon to the map
+  L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+
+  
+  // Add the GeoJSON node to the map
+  var geojson_node_str = "{{ node.point.json|escapejs }}";
+  var geojson_node = JSON.parse(geojson_node_str);
+  
+
+  var polygonLayer = L.geoJSON(geojson_node).addTo(map);
+
+  // Add a popup to the polygon
+  
+  polygonLayer.bindPopup('Temperature: ' + {{ data.temperature }} + '°C <br>Humidity: ' + {{ data.humidity }} + '% <br>Wind: ' + {{ data.wind }} + 'km/h ');
+  
+  // Add the client name to the page
+  document.getElementById('client').innerHTML = client;
+</script>
+
+
+
+
+ 
+
+
+
+
+
+
+ 
+  
+  
+  
+  
+  
+  
+ 
+  </body>
+</html>
+
+{% endblock %}

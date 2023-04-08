@@ -1,4 +1,5 @@
 import json
+from multiprocessing.connection import Client
 from statistics import geometric_mean
 from unittest import result
 from django.http import JsonResponse
@@ -9,10 +10,13 @@ from django.contrib.gis.geos import GEOSGeometry
 
 import pyowm
 from .mqtt import start_mqtt_client
-
+from signup.models import client
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.serializers import serialize
+
+
+from .forms import *
 
 
 
@@ -40,13 +44,13 @@ def weather(request):
 
 
 def result():
-    post = Node.objects.order_by('-IdNode').first()
+    post = Data.objects.order_by('-IdData').first()
     tempp = post.temperature
     humm = post.humidity
     windd = post.wind
 
-    if tempp > 30 and humm < 30 and windd > 30:
-     #if tempp > 20 and humm < 80 and windd > 4:
+    #if tempp > 30 and humm < 30 and windd > 30:
+    if tempp > 20 and humm < 80 and windd > 4:
         status = 'Risk'
     else:
         status = 'SAFE'
@@ -56,45 +60,60 @@ def result():
 
 
 
-def start_mqtt(request):
+def start_mqtt(request, id):
     # Start the MQTT client
-    start_mqtt_client()
+    start_mqtt_client(id)
     
     # Return a simple response to indicate that the client has started
     #return HttpResponse('MQTT client started successfully.')
     return render(request, 'polygon_detail.html', {})
 
-def polygon_detail(request, id):
-    polygons = myPolygon.objects.all()
-    polygon = myPolygon.objects.get(idPolygone=id)
+def polygon_detail(request, iid):
+    projects = Project.objects.all()
+    my_project = Project.objects.get(idProject=iid) 
+    #polygons = [p.Polygon for p in projects if p.Polygon]
+    #polygons = myPolygon.objects.all()
+    polygon = my_project.Polygon
     
 
     status = result()
     polygon.status = status
     polygon.save()
+
+    node = polygon.node
+
    # get the last Node object and save it to the polygon
-    #node = Node.objects.order_by('-id').first()
+    #node = Node.objects.order_by('-Idnode').first()
     #polygon.node = node
     #polygon.save()
 
+    data = node.Data
+    post = Data.objects.order_by('-IdData').first()
+    #start_mqtt_client(id)
     
-    post = Node.objects.order_by('-IdNode').first()
+    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'node':node, 'parm': data})
 
-    
-    return render(request, 'polygon_detail.html', {'polygons': polygons, 'polygon': polygon, 'parm': post})
 
-   
 
-def stocker_polygone(request):
-    polygons = myPolygon.objects.all()
+def start (request):
+    projects = Project.objects.all()
+    #polygons = [p.Polygon for p in projects if p.Polygon]
+  
+    return render(request, 'start.html', {'projects': projects})   
+
+
+
+def step_one(request):
+    projects = Project.objects.all()
+    polygons = [p.Polygon for p in projects if p.Polygon]
     if request.method == 'POST':
-        Prject_name = request.POST.get('nom') 
-        Client_name = request.POST.get('client')      
-        polygonString = request.POST.get('points')
-        print(polygonString)
-        polygon = GEOSGeometry(polygonString, srid=4326)
-        #myPolygon.nom = request.user
-        instance = myPolygon(geom=polygon , nom=Prject_name , client=Client_name)
+        Prject_name = request.POST.get('nom')
+        start_date = request.POST.get('start_date')
+        end_date = request.POST.get('end_date')
+        print(end_date) 
+
+ 
+        instance = Project( nom=Prject_name, Date_start = start_date, Date_end=end_date )
         
         instance.save()
         
@@ -102,20 +121,108 @@ def stocker_polygone(request):
 
         
        
-        return redirect('stocker_polygone')
-    return render(request, 'map1.html', {'polygons': polygons})
+        return redirect('step_2', id=instance.idProject)
+    return render(request, 'step_1.html', {'projects': projects})   
+
+def step_tow(request, id):
+    projects = Project.objects.all()
+    polygons = [p.Polygon for p in projects if p.Polygon]
+    if request.method == 'POST':
+        formulaire = Form_client(request.POST)
+        if formulaire.is_valid():
+            formulaire.enregistrer(id)
+            pseudo = formulaire.cleaned_data['pseudo']
+            variable = 'client'
+            ####### redirect dashboard normally
+            #return redirect('map/',variable, pseudo)
+            return redirect('stocker_polygone', id=id)
+        return render(request, 'step_2.html', {'form': formulaire, 'projects': projects})
+        
+
+    return render(request, 'step_2.html', {'form': Form_client(),'projects': projects})   
+
+def stocker_polygone(request, id):
+    projects = Project.objects.all()
+    polygons = [p.Polygon for p in projects if p.Polygon]
+    if request.method == 'POST':
+        Prject_name = request.POST.get('nom') 
+        Client_name = request.POST.get('client')      
+        polygonString = request.POST.get('points')
+        print(polygonString)
+        polygon = GEOSGeometry(polygonString, srid=4326)
+        #myPolygon.nom = request.user
+        
+        instance = myPolygon(geom=polygon , nom=Prject_name )
+        instance.save()
+
+        my_project = Project.objects.get(idProject=id) 
+        my_project.Polygon = instance
+        my_project.save()
+
+
+        
+
+
+        
+       
+        return redirect('step_4', id=id)
+    return render(request, 'map1.html', {'projects': projects})
+
+
+def step_four(request, id):
+    projects = Project.objects.all()
+    polygons = [p.Polygon for p in projects if p.Polygon]
+    my_project = Project.objects.get(idProject=id)
+    polygon = my_project.Polygon
+    
+    if request.method == 'POST':
+        lat = request.POST.get('lat')
+        lng = request.POST.get('lng')
+        ref = request.POST.get('ref')
+        Sensors = request.POST.get('Sensors')
+        print(lat,lng)
+        point = Point(x=float(lng), y=float(lat))
+        # node_name = request.POST.get('nom')
+        #sensors = request.POST.get('client')
+        
+
+        # create a new Data object
+        new_data = Data(temperature=0, humidity=0, wind=0)
+        new_data.save()
+ 
+        instancee = Node(point=point, ref=ref, Sensors=Sensors, Data=new_data)
+        instancee.save()
+
+
+        polygon.node = instancee
+        polygon.save()
 
 
 
-def update_weather(request):
+        
+        
+        return redirect('start')
+    
+    return render(request, 'step_4.html', {'polygons': polygons, 'projects': projects, 'polygon': polygon})
+
+def update_weather(request, id):
     # get updated weather information
-    post = Node.objects.order_by('-IdNode').first()
 
+
+
+
+    my_project = Project.objects.get(idProject=id) 
+    polygon = my_project.Polygon
+    node = polygon.node
+    rssi= node.RSSI
+
+    Data = node.Data
     # create a dictionary with the updated information
     data = {
-        'temperature': post.temperature,
-        'humidity': post.humidity,
-        'wind': post.wind,
+        'temperature': Data.temperature,
+        'humidity': Data.humidity,
+        'wind': Data.wind,
+        'RSSI' : rssi
     }
 
     # return a JsonResponse with the updated data
@@ -123,6 +230,16 @@ def update_weather(request):
 
 
 
+def show(request, seudo):
+    my_client = client.objects.get(pseudo=seudo)
+    nam = my_client.nom
+    print(nam)
+    my_project = Project.objects.get(client=my_client)
+    polygon = my_project.Polygon
+    node = polygon.node
+    data = node.Data
+    return render(request, 'show.html', {'polygon': polygon, 'node':node, 'data':data})
+    
 
 
 def get_polygon(request, polygon_id):

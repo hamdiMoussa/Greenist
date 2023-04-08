@@ -42,16 +42,16 @@
              <div class="card-body">
               <div class="card mb-2">
                 <div class="card-body">
-                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;' onclick="location.href='{% url 'stocker_polygone' %}'">Add New Project</button>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;' onclick="location.href='{% url 'start' %}'">Add New Project</button>
                 </div>
               </div>
-              {% for polygon in polygons %}
+              {% for project in projects %}
               <div class="card mb-2 " style="background-color: #d4d6d8; display: flex; flex-direction: column;">
                 <div class="card-body text-vert">
-                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ polygon.nom }}</h6>
-                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ polygon.client }}</h6>
-                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ polygon.idPolygone }}</h6>
-                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' polygon.idPolygone %}'">View all detail</button>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ project.nom }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ project.client }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ project.idProject}}</h6>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' project.idProject %}'">View all detail</button>
                 </div>
               </div>
               {% endfor %}
@@ -64,7 +64,7 @@
            <form method="POST">
              {% csrf_token %}
                
-             <h1>Details of : {{ polygon.nom }}</h1>
+             <h1>Details of : {{ my_project.nom }}</h1>
 
                   
                     <div class="row justify-content-left align-items-center">
@@ -74,9 +74,9 @@
                                   <h5>Client Information</h5>
                               </div>
                               <div class="card-body">
-                                  <p><strong>ID: </strong>{{ polygon.idPolygone }}</p>
-                                  <p><strong>Client: </strong>{{ polygon.client }}</p>
-                                  <p><strong>Status: </strong>{{ polygon.status }}</p>
+                                  <p><strong>Client: </strong>{{ my_project.client }}</p>
+                                  <p><strong>Start : </strong>{{ my_project.Date_start }}</p>
+                                  <p><strong>End : </strong>{{ my_project.Date_end|date:"F d, Y" }}</p>
                               </div>
                           </div>
                       </div>
@@ -84,8 +84,10 @@
                       <div class="col-md-4 mt-5">
                           <div class="card">
                               <div class="card-header text-center">
-                                  
-                                  <h5><a href="{% url 'update' %}">Weather Information</a></h5>
+                              {% if my_project %}
+                              <h5><a href="{% url 'update' my_project.idProject %}">Weather Information</a></h5>
+                              {% endif %}
+
                                   
                               </div>
                               <div id="weather-info">
@@ -99,6 +101,80 @@
                       </div>
                   </div>
                   
+
+
+
+
+
+                  <div class="row justify-content-left align-items-center">
+                    <div class="col-md-4 mt-5">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h5>Node Information</h5>
+                          
+                            </div>
+                            <br>
+                            <div class="card-body">
+                                <p><strong>Referance: </strong>{{ node.ref }}</p>
+                                <p><strong>Sensors: </strong>{{ node.Sensors }}</p>
+                                <p><strong>Duty Cycle: </strong>{{ 'Every 1 Min' }}</p>
+                                <div id="rssi">
+                                <p><strong>RSSI: </strong> {{ node.RSSI }}</p>
+                                </div>
+                                <p><strong>Battery level: </strong>{{ node.Battery_value }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-4 mt-5">
+                      <div class="col  mt-2">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                
+                                <h5>Prediction result</h5>
+                                
+                            </div>
+                            <div id="">
+                              <div class="card-body">
+                                  <p><strong>WFI :</strong>{{ polygon.WFI }}</p>
+                                  {% if polygon.status == 'RISK' %}
+                                  <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ polygon.status }}</span></p>
+                                  {% elif polygon.status == 'SAFE' %}
+                                  <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ polygon.status }}</span></p>
+                                  {% endif %}
+   
+                              </div>
+                          </div>
+                        </div>
+                      </div> 
+
+                      <div class="col mt-2">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                
+                                <h5>Detection result</h5>
+                                
+                            </div>
+                            <div id="">
+                              <div class="card-body">
+                                  {% if polygon.status == 'RISK' %}
+                                  <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ FIRE }}</span></p>
+                                  {% elif polygon.status == 'SAFE' %}
+                                  <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ 'NO FIRE' }}</span></p>
+                                  {% endif %}
+   
+                              </div>
+                          </div>
+                        </div>
+                      </div> 
+                      
+                    </div>
+                </div>
+
+
+
+
+
                  
 
                  <div class="col-md-6">
@@ -114,10 +190,7 @@
                  <label for="geom">Geometry:</label>
                  <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
 
-                  <!-- <button class="btn btn-outline-primary my-2 my-sm-0" type="submit" value="save" style='width:30%'>
-                 save polygone
-                  </button> 
-                  <h5><a href="{% url 'update' %}">Click Here To See Hum and Temp</a></h5>-->
+             
     
                 
                 
@@ -151,19 +224,23 @@
   var color = status === "Risk" ? "red" : "green";
 
   // Create a Leaflet map
-  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 10);
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
 
   L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
   
   // Add the GeoJSON polygon to the map
-  
   L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+  
+  // Add the GeoJSON node to the map
+  var geojson_node_str = "{{ node.point.json|escapejs }}";
+  var geojson_node = JSON.parse(geojson_node_str);
+  L.geoJSON(geojson_node).addTo(map);
   
   // Add the client name to the page
   document.getElementById('client').innerHTML = client;
-  </script>
+</script>
 
 
 
@@ -175,7 +252,7 @@
    $(document).ready(function() {
        setInterval(function() {
            $.ajax({
-               url: "{% url 'update_weather' %}",
+               url: "{% url 'update_weather' my_project.idProject %}",
                type: "GET",
                success: function(data) {
                    $('#weather-info').html(
@@ -184,6 +261,10 @@
                           '<p><strong>Humidity:</strong> ' + data.humidity + '%</p>' +
                           '<p><strong>Wind Speed:</strong> ' + data.wind + ' km/h</p>' +
                        '</div>'
+                   );
+                   $('#rssi').html(
+                     
+                          '<p><strong>RSSI: </strong>' + data.RSSI +' </p>' 
                    );
                },
                error: function(xhr, status, error) {

@@ -1,0 +1,165 @@
+
+{% extends 'base.html' %} 
+
+{% block content %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Markers Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+  
+    <!-- Leaflet Draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+
+  </head>
+  <body  style="background-color:#e9d58b; ">
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        <div class="col-3">
+          <!-- Sidebar -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title" style="text-align:center; color:rgb(51, 77, 4);">Projects</h5>
+             </div>
+             <div class="card-body">
+              <div class="card mb-2">
+                <div class="card-body">
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;' onclick="location.href='{% url 'start' %}'">Add New Project</button>
+                </div>
+              </div>
+
+             </div>
+             </div>
+            </div>
+         
+        <div  style="background-color: #FFFFFF;width: 900px; border-radius: 10px;">
+
+         <form method="POST">
+           {% csrf_token %}
+             
+           <div class="card-header text-center">
+            <h4>Step 4 - Add Node</h4>
+           </div>
+
+               <div class="row">
+                 <div class="col-md-5">
+                  <label for="project-name">Node referance</label>
+                  <input type="text" id="project-name" name="ref" class="form-control" placeholder="Enter Node referance">
+                 </div>
+                 <div class="col-md-5">
+                  <label for="project-name">Sensors</label>
+                  <input type="text" id="client" name="Sensors"  class="form-control" placeholder="Enter the Sensors type">
+                 </div>
+                </div>
+                 
+                 
+               
+                
+
+               <div class="col-md-6">
+
+                <h2>Map</h2>
+                <input type="text" name="piont" id="id_point">
+                <div class='col-6 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px; border: 1px solid rgb(9, 0, 0) ;">
+                  <input type="hidden" name="lat" id="lat">
+                  <input type="hidden" name='lng' id="lng">
+                  <div class="leaflet-control"></div>
+               </div>
+              
+
+               
+             
+               <label for="geom">Geometry:</label>
+               <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
+               
+
+              <div class="row">
+                <div class="col-md-5">
+                <label for="lat">Latitude:</label>
+                <input type="text" id="lat" name="latitude">
+                </div>
+                <div class="col-md-5">
+                <label for="lng">Longitude:</label>
+                <input type="text" id="lng" name="longitude">
+               </div>
+              </div> 
+              <br><br>
+
+           
+
+                <div class="text-center">
+                  <button type="submit" class="btn btn-dark" style='width:30%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Save</button>
+              </div>
+
+  
+              
+              
+          </form>
+        </div>
+       
+    </div>
+  </div>
+
+<script src="{% static 'js/map.js' %}"></script>
+
+<script>
+var client = "{{ client }}";
+var geojson_str = "{{ polygon.geom.json|escapejs }}";
+var geojson = JSON.parse(geojson_str);
+
+// Create a Leaflet map
+var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
+
+
+L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+// Add the GeoJSON polygon to the map
+L.geoJSON(geojson).addTo(map);
+
+// Add the client name to the page
+document.getElementById('client').innerHTML = client;
+
+
+
+var marker;
+map.on("click", function (e) {
+    // If marker is already defined, remove it before adding a new one
+    if (marker) {
+      map.removeLayer(marker);
+    }
+    // Add new marker at double-clicked location
+    marker = L.marker(e.latlng, { draggable: true }).addTo(map);
+    document.getElementById("lat").value = e.latlng.lat;
+    document.getElementById("lng").value = e.latlng.lng;
+
+    marker.on("dragend", function (e) {
+      var marker = e.target;
+      var position = marker.getLatLng();
+      document.getElementById("lat").value = position.lat;
+      document.getElementById("lng").value = position.lng;
+    });
+  });
+</script>
+</body>
+</html>
+
+{% endblock %}
+
+
+
+
+

@@ -14,18 +14,23 @@ def on_connect(mqtt_client, userdata, flags, rc):
     else:
         print('Bad connection. Code:', rc)
 
-def on_message(mqtt_client, userdata, msg):
+def on_message(mqtt_client, userdata, msg, id):
     # Decode the incoming message
     payload_dict =json.loads(msg.payload)
-   # print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
+    print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
 
     # Get temperature and humidity values from payload
     temperature = payload_dict['uplink_message']['decoded_payload']['temperature']
     humidity = payload_dict['uplink_message']['decoded_payload']['humidity']
-    print('temperature :', temperature, 'humidity :', humidity,'\n')
+
+    rssi = payload_dict['uplink_message']['rx_metadata'][0]['rssi']
+    snr = payload_dict['uplink_message']['rx_metadata'][0]['snr']
+
+    print('temperature :', temperature, 'humidity :', humidity, 'rssi :', rssi, 'snr :', snr, '\n')
 
 
-
+    
+    
 
 
 
@@ -48,17 +53,30 @@ def on_message(mqtt_client, userdata, msg):
 
     print('temperature :', temperature, 'humidity :', humidity, 'wind :', wind_speed, '\n')
     # Create a new Post object and save it to the database
-    node = Node(temperature=temperature, humidity=humidity, wind=wind_speed)
+    
+    my_project = Project.objects.get(idProject=id)
+    polygon = my_project.Polygon
+    node = polygon.node
+    node.RSSI = rssi
     node.save()
 
+    my_project = Project.objects.get(idProject=id)
+    polygon = my_project.Polygon
+    node = polygon.node
+    data = node.Data
+    data.temperature = temperature
+    data.humidity = humidity
+    data.wind = wind_speed
+    data.save()
 
-def start_mqtt_client():
+
+def start_mqtt_client(id):
     # Create a new MQTT client instance
     client = mqtt.Client()
 
     # Set the client's connection and message handling functions
     client.on_connect = on_connect
-    client.on_message = on_message
+    client.on_message = lambda client, userdata, msg: on_message(client, userdata, msg, id)
 
     # Set the client's username and password
     client.username_pw_set(settings.MQTT_USER, settings.MQTT_PASSWORD)

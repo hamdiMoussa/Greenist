@@ -26,4 +26,6 @@ class polygonAdmin(admin.GISModelAdmin):
     list_display = ("geom")
 
 
+admin.site.register(Data)
 admin.site.register(Node)
+admin.site.register(Project)
