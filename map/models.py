@@ -56,7 +56,7 @@ class Node(models.Model):
     RSSI = models.BigIntegerField(null=True)
     Battery_value = models.BigIntegerField(null=True)
     point = models.PointField(null=True)
-
+    camera = models.BigIntegerField(null=True)
     Data = models.ForeignKey(Data, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
 
    

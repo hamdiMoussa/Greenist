@@ -15,8 +15,10 @@ from signup.models import client
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.serializers import serialize
 
-
+from .status import result
 from .forms import *
+
+
 
 
 
@@ -43,18 +45,7 @@ def weather(request):
 
 
 
-def result():
-    post = Data.objects.order_by('-IdData').first()
-    tempp = post.temperature
-    humm = post.humidity
-    windd = post.wind
 
-    #if tempp > 30 and humm < 30 and windd > 30:
-    if tempp > 20 and humm < 80 and windd > 4:
-        status = 'Risk'
-    else:
-        status = 'SAFE'
-    return status
 
 
 
@@ -76,9 +67,7 @@ def polygon_detail(request, iid):
     polygon = my_project.Polygon
     
 
-    status = result()
-    polygon.status = status
-    polygon.save()
+
 
     node = polygon.node
 
@@ -213,17 +202,29 @@ def update_weather(request, id):
 
     my_project = Project.objects.get(idProject=id) 
     polygon = my_project.Polygon
+
+    status = result()
+    
+    polygon.status = status
+    polygon.save()
+
+
+    status = polygon.status
+    wfi = polygon.WFI
     node = polygon.node
     rssi= node.RSSI
-
+    cam=node.camera
     Data = node.Data
     # create a dictionary with the updated information
     data = {
         'temperature': Data.temperature,
         'humidity': Data.humidity,
         'wind': Data.wind,
-        'RSSI' : rssi
-    }
+        'RSSI' : rssi,
+        'camera' : cam,
+        'wfi' : wfi,
+        'status' : status,
+        }
 
     # return a JsonResponse with the updated data
     return JsonResponse(data)

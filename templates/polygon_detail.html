@@ -134,17 +134,20 @@
                                 <h5>Prediction result</h5>
                                 
                             </div>
-                            <div id="">
+                            
                               <div class="card-body">
-                                  <p><strong>WFI :</strong>{{ polygon.WFI }}</p>
-                                  {% if polygon.status == 'RISK' %}
-                                  <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ polygon.status }}</span></p>
-                                  {% elif polygon.status == 'SAFE' %}
-                                  <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ polygon.status }}</span></p>
-                                  {% endif %}
-   
+                                <div id="wfi">
+                                <p><strong>WFI :</strong>{{ polygon.WFI }}</p>
+                                </div>
+                                <div id="status">
+                                {% if polygon.status == 'RISK' %}
+                                <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ polygon.status }}</span></p>
+                                {% elif polygon.status == 'SAFE' %}
+                                <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ polygon.status }}</span></p>
+                                {% endif %}
+                                </div>
                               </div>
-                          </div>
+                          
                         </div>
                       </div> 
 
@@ -155,15 +158,14 @@
                                 <h5>Detection result</h5>
                                 
                             </div>
-                            <div id="">
+                            <div id="status-card">
                               <div class="card-body">
-                                  {% if polygon.status == 'RISK' %}
-                                  <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ FIRE }}</span></p>
-                                  {% elif polygon.status == 'SAFE' %}
-                                  <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ 'NO FIRE' }}</span></p>
-                                  {% endif %}
-   
-                              </div>
+                                {% if node.camera == 0 %}
+                                    <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ 'NO FIRE' }}</span></p>
+                                {% else %}
+                                    <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ 'FIRE' }}</span></p>
+                                {% endif %}
+                            </div>
                           </div>
                         </div>
                       </div> 
@@ -231,7 +233,8 @@
     }).addTo(map);
   
   // Add the GeoJSON polygon to the map
-  L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+  //L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+  var polygonLayer = L.geoJSON(geojson, { style: { color: color } }).addTo(map);
   
   // Add the GeoJSON node to the map
   var geojson_node_str = "{{ node.point.json|escapejs }}";
@@ -255,6 +258,9 @@
                url: "{% url 'update_weather' my_project.idProject %}",
                type: "GET",
                success: function(data) {
+                   status = data.status;
+                   color = status === "Risk" ? "red" : "green";
+                   polygonLayer.setStyle({ color: color });
                    $('#weather-info').html(
                        '<div class="card-body">' +
                           '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
@@ -266,6 +272,22 @@
                      
                           '<p><strong>RSSI: </strong>' + data.RSSI +' </p>' 
                    );
+
+                   
+                   if (data.camera == 0) {
+                        $('#status-card').html('<div class="card-body"><p><strong>Status: </strong><span style="color:green; font-weight:bold">NO FIRE</span></p></div>');
+                    } else {
+                        $('#status-card').html('<div class="card-body"> <p><strong>Status: </strong><span style="color:red; font-weight:bold">FIRE</span></p></div>');
+                    } 
+
+
+                    $('#wfi').html('<p><strong>WFI: </strong>' + data.wfi + '</p>');
+                    if (data.status == 'SAFE') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:green; font-weight:bold">' + data.status + '</span></p>');
+                    } else {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:red; font-weight:bold">' + data.status + '</span></p>');
+                    }
+
                },
                error: function(xhr, status, error) {
                    console.log("An error occurred: " + xhr.status + " " + xhr.statusText);
