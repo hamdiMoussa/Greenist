@@ -56,7 +56,9 @@ class Node(models.Model):
     RSSI = models.BigIntegerField(null=True)
     Battery_value = models.BigIntegerField(null=True)
     point = models.PointField(null=True)
+    FWI=models.BigIntegerField(null=True)
     camera = models.BigIntegerField(null=True)
+    status = models.CharField(max_length=50, null=True)
     Data = models.ForeignKey(Data, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
 
    
@@ -67,8 +69,8 @@ class myPolygon(models.Model):
     idPolygone = models.AutoField(primary_key=True)
     nom = models.CharField(max_length=50, null=True)
     geom = models.PolygonField()
-    status = models.CharField(max_length=50, null=True)
-    WFI=models.BigIntegerField(null=True)
+    
+    
 
     node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True,)
     #client = models.CharField(max_length=50, null=True)

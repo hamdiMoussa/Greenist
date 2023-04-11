@@ -123,9 +123,9 @@ var geojson = JSON.parse(geojson_str);
 var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
 
 
-L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-  }).addTo(map);
+L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(map);
 
 // Add the GeoJSON polygon to the map
 L.geoJSON(geojson).addTo(map);

@@ -28,6 +28,22 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
+    <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha384-6DBIkDzKj1PHw3gW8skvQoAQ5KoG5ru5Ot1WmYvFxBn96yO9SB+4+W4A7WuL4izU"
+    crossorigin=""/>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" integrity="sha512-1xhdQwMzS8Ly+5ZCvSk/Z9oGt92uI1FUpy2+vcD7zTkXXw06ivV8WgZ+flv7dX9tMJPCT8YENWQOv+7OxNwHvw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js" integrity="sha512-PnX6fRPjq/LiYD6rsRv6LZx6PZyoLCejr3q1ZDDtzAVT9T1TzT8OGpVEyTjjntPtd+bGwIzgm1orDjZi2QX6UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
+
+
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/hosuaby/Leaflet.SmoothMarkerBouncing@v3.0.2/dist/bundle.js"
+        crossorigin="anonymous"></script>
+
 
   </head>
   <body  style="background-color:#e9d58b; ">
@@ -136,16 +152,22 @@
                             </div>
                             
                               <div class="card-body">
-                                <div id="wfi">
-                                <p><strong>WFI :</strong>{{ polygon.WFI }}</p>
+                                <div id="fwi">
+                                <p><strong>FWI :</strong>{{ node.FWI }}</p>
                                 </div>
                                 <div id="status">
-                                {% if polygon.status == 'RISK' %}
-                                <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ polygon.status }}</span></p>
-                                {% elif polygon.status == 'SAFE' %}
-                                <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ polygon.status }}</span></p>
-                                {% endif %}
-                                </div>
+                                  {% if node.status == 'DOWN' %}
+                                      <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif node.status == 'MODERATE' %}
+                                      <p><strong>Status: </strong><span style="color:blue; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif node.status == 'HIGH' %}
+                                      <p><strong>Status: </strong><span style="color:yellow; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif node.status == 'VERY HIGH' %}
+                                      <p><strong>Status: </strong><span style="color:orange; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif node.status == 'EXTREME' %}
+                                      <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ node.status }}</span></p>
+                                  {% endif %}
+                                  </div>
                               </div>
                           
                         </div>
@@ -214,7 +236,8 @@
 
 
 
-
+<script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
 
  <script>
   var client = "{{ client }}";
@@ -228,8 +251,8 @@
   // Create a Leaflet map
   var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
 
-  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(map);
   
   // Add the GeoJSON polygon to the map
@@ -237,9 +260,23 @@
   var polygonLayer = L.geoJSON(geojson, { style: { color: color } }).addTo(map);
   
   // Add the GeoJSON node to the map
-  var geojson_node_str = "{{ node.point.json|escapejs }}";
-  var geojson_node = JSON.parse(geojson_node_str);
-  L.geoJSON(geojson_node).addTo(map);
+  var marker = L.marker([{{ node.point.y }}, {{ node.point.x }}]).setBouncingOptions({
+        bounceHeight : 50,    // height of the bouncing
+        bounceSpeed  : 54,    // bouncing speed coefficient
+       // exclusive    : true,  // if this marker is bouncing all others must stop
+    }).addTo(map)
+  //var geojson_node_str = "{{ node.point.json|escapejs }}";
+ // var geojson_node = JSON.parse(geojson_node_str);
+ // L.geoJSON(geojson_node).addTo(map);
+   // Define the fire icon
+   var fireIcon = L.icon({
+    iconUrl: '/static/images/fire3.png',
+    iconSize: [50, 50],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -19]
+});
+
+
   
   // Add the client name to the page
   document.getElementById('client').innerHTML = client;
@@ -252,15 +289,30 @@
 
 
  <script>
+  
    $(document).ready(function() {
        setInterval(function() {
            $.ajax({
                url: "{% url 'update_weather' my_project.idProject %}",
                type: "GET",
                success: function(data) {
-                   status = data.status;
-                   color = status === "Risk" ? "red" : "green";
-                   polygonLayer.setStyle({ color: color });
+                status = data.status;
+                if (status === "DOWN") {
+                    color = "green";
+                } else if (status === "MODERATE") {
+                   color = "blue";
+                } else if (status === "HIGH") {
+                    color = "yellow";
+                } else if (status === "VERY HIGH") {
+                    color = "orange";
+                } else if (status === "EXTREME") {
+                    color = "red";
+                } else {
+                    color = "black";
+                }
+                polygonLayer.setStyle({ color: color });                   
+
+
                    $('#weather-info').html(
                        '<div class="card-body">' +
                           '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
@@ -281,13 +333,37 @@
                     } 
 
 
-                    $('#wfi').html('<p><strong>WFI: </strong>' + data.wfi + '</p>');
-                    if (data.status == 'SAFE') {
-                        $('#status').html('<p><strong>Status: </strong><span style="color:green; font-weight:bold">' + data.status + '</span></p>');
-                    } else {
-                        $('#status').html('<p><strong>Status: </strong><span style="color:red; font-weight:bold">' + data.status + '</span></p>');
-                    }
+                    $('#fwi').html('<p><strong>FWI: </strong>' + data.fwi + '</p>');
 
+
+
+                    if (data.status == 'DOWN') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:green; font-weight:bold">' + data.status + '</span></p>');
+                    } else if (data.status == 'MODERATE') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:blue; font-weight:bold">' + data.status + '</span></p>');
+                    } else if (data.status == 'HIGH') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:yellow; font-weight:bold">' + data.status + '</span></p>');
+                    } else if (data.status == 'VERY HIGH') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:orange; font-weight:bold">' + data.status + '</span></p>');
+                    } else if (data.status == 'EXTREME') {
+                        $('#status').html('<p><strong>Status: </strong><span style="color:red; font-weight:bold">' + data.status + '</span></p>');
+                    }                   
+
+
+
+
+
+
+                    if (status === "EXTREME") {
+                      marker.setIcon(fireIcon)
+                      marker.bounce(5);
+                     
+                 
+                      
+                    } else {
+                      marker.setIcon(null);
+                      marker.stopBouncing();
+                     }
                },
                error: function(xhr, status, error) {
                    console.log("An error occurred: " + xhr.status + " " + xhr.statusText);

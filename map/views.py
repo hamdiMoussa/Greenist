@@ -18,6 +18,10 @@ from django.core.serializers import serialize
 from .status import result
 from .forms import *
 
+import csv 
+from .FWI import *
+from datetime import datetime
+
 
 
 
@@ -79,6 +83,38 @@ def polygon_detail(request, iid):
     data = node.Data
     post = Data.objects.order_by('-IdData').first()
     #start_mqtt_client(id)
+
+
+
+
+
+
+
+    
+    temperature = data.temperature
+    humidity = data.humidity
+    wind_speed = data.wind
+
+
+    with open('testBatch.csv', mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
+
+
+    batchFWI('testBatch.csv')
+
+
+    with open('testBatch.csv', mode='r') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+        last_row = rows[-1]
+        FWI = last_row[-1]
+    
+    fwi = float(FWI)
+    node.FWI=fwi
+    node.save()
+
+
     
     return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'node':node, 'parm': data})
 
@@ -203,15 +239,20 @@ def update_weather(request, id):
     my_project = Project.objects.get(idProject=id) 
     polygon = my_project.Polygon
 
-    status = result()
+    status = result(id)
     
-    polygon.status = status
-    polygon.save()
 
-
-    status = polygon.status
-    wfi = polygon.WFI
     node = polygon.node
+    node.status = status
+    node.save()
+
+
+    
+    
+    node = polygon.node
+
+    status = node.status
+    fwi = node.FWI
     rssi= node.RSSI
     cam=node.camera
     Data = node.Data
@@ -222,7 +263,7 @@ def update_weather(request, id):
         'wind': Data.wind,
         'RSSI' : rssi,
         'camera' : cam,
-        'wfi' : wfi,
+        'fwi' : fwi,
         'status' : status,
         }
 
