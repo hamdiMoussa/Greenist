@@ -85,13 +85,24 @@
                <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
                
 
+              <div class="row">
+                <div class="col-md-5">
+                <label for="lat">Latitude:</label>
+                <input type="text" id="lat" name="latitude">
+                </div>
+                <div class="col-md-5">
+                <label for="lng">Longitude:</label>
+                <input type="text" id="lng" name="longitude">
+               </div>
+              </div> 
               <br><br>
 
+           
+
                 <div class="text-center">
-                  <button type="submit" class="btn btn-dark" style='width:50%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Add New Node</button>
-        
+                  <button type="submit" class="btn btn-dark" style='width:30%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>saveee</button>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' project.idProject %}'">View all detail</button>
               </div>
-              
 
   
               
@@ -110,7 +121,7 @@ var geojson_str = "{{ polygon.geom.json|escapejs }}";
 var geojson = JSON.parse(geojson_str);
 
 // Create a Leaflet map
-var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 10);
+var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
 
 
 L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {

@@ -5,8 +5,8 @@ function init(){
 
     const mapElement = document.getElementById('mapid')
      var map = L.map(mapElement).setView([35, 9.5], 6);
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+     L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(map);
 
 
@@ -30,22 +30,47 @@ function init(){
     map.addControl(drawControl);
 
     
-  
-    map.on('draw:created', function (e) {
-            layer = e.layer;
-        const coordinates = layer.editing.latlngs[0][0]
-        let polygon = [];
-        coordinates.forEach((element) => {
-            polygon.push(`${element.lng} ${element.lat}`);
-        });
-        polygon.push(`${coordinates[0].lng} ${coordinates[0].lat}`);
-        polygonString = 'POLYGON (('+polygon.join(', ')+'))';
-        document.getElementById('points').value=polygonString;
-        drawnItems.addLayer(layer);
-        drawControl.remove();
-        drawEditControl.addTo(map);
-    });
 
+
+    map.on('draw:created', function (e) {
+        var type = e.layerType;
+        layer = e.layer;
+            console.log(layer.toGeoJSON());
+           
+            const   coordinates = layer.toGeoJSON();
+            console.log("coord : "+e.layer.toGeoJSON().geometry.coordinates);
+            console.log(type);
+            if (type === 'polygon'){
+                drawnItems.addLayer(layer);
+                console.log("coord : "+e.layer.toGeoJSON().geometry.coordinates);
+            myjson=drawnItems.toGeoJSON() ;
+        console.log(myjson);}
+        let coords = [];
+        myjson.features.forEach((coordonne) => {
+            coords = [...coords, ...coordonne.geometry.coordinates];
+        })
+            const multiPolygone = { 
+                "type": "MultiPolygon",
+                "coordinates": [
+                    [...coords]
+                ]
+            }
+            console.log(multiPolygone)
+        document.getElementById('cord').value=JSON.stringify(multiPolygone);
+        
+        
+        
+        
+       
+       
+     })
+        
+        
+        
+        
+       
+       
+    //  })
 
     
 
@@ -58,13 +83,13 @@ function init(){
         });
         polygon.push(`${coordinates[0].lng} ${coordinates[0].lat}`);
         polygonString = 'POLYGON (('+polygon.join(', ')+'))';
-        document.getElementById('points').value=polygonString;
+        document.getElementById('multiPolygon').value=polygonString;
     });
 
     map.on('draw:deleted', function () {
         drawControl.addTo(map);
         drawEditControl.remove();
-        document.getElementById('points').value='';
+        document.getElementById('multiPolygon').value='';
     });
   
 

@@ -47,6 +47,10 @@ class Data(models.Model):
 
 
 
+class myPolygon(models.Model):
+    idPolygone = models.AutoField(primary_key=True)
+    nom = models.CharField(max_length=50, null=True)
+    geom = models.MultiPolygonField()
 
 
 class Node(models.Model):
@@ -60,19 +64,14 @@ class Node(models.Model):
     camera = models.BigIntegerField(null=True)
     status = models.CharField(max_length=50, null=True)
     Data = models.ForeignKey(Data, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
+    polygon = models.ForeignKey(myPolygon, on_delete=models.CASCADE, null=True, related_name='nodes')
 
    
 
 
 
-class myPolygon(models.Model):
-    idPolygone = models.AutoField(primary_key=True)
-    nom = models.CharField(max_length=50, null=True)
-    geom = models.PolygonField()
     
-    
-
-    node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True,)
+    #node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True,)
     #client = models.CharField(max_length=50, null=True)
     #node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True,)
     #client = models.ForeignKey(client, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
@@ -95,7 +94,8 @@ class Project(models.Model):
     
 
     
-   
+    def __str__(self):
+        return f' Project: {self.nom}'
   
 
   

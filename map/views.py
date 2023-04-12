@@ -69,18 +69,26 @@ def polygon_detail(request, iid):
     #polygons = [p.Polygon for p in projects if p.Polygon]
     #polygons = myPolygon.objects.all()
     polygon = my_project.Polygon
+
+    nodes = Node.objects.filter(polygon=polygon)
+
+    #node = Node.objects.filter(polygon=polygon).first()
+    node0 = nodes[0]
+    node1 = nodes[1]
     
+    node = nodes[0]
+    data = node.Data
+    print(node)  
+    print(nodes)  
 
 
 
-    node = polygon.node
 
-   # get the last Node object and save it to the polygon
+       # get the last Node object and save it to the polygon
     #node = Node.objects.order_by('-Idnode').first()
     #polygon.node = node
     #polygon.save()
 
-    data = node.Data
     post = Data.objects.order_by('-IdData').first()
     #start_mqtt_client(id)
 
@@ -116,7 +124,7 @@ def polygon_detail(request, iid):
 
 
     
-    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'node':node, 'parm': data})
+    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'nodes':nodes, 'node':node, 'node0':node0, 'node1':node1, 'parm': data})
 
 
 
@@ -198,7 +206,8 @@ def step_four(request, id):
     projects = Project.objects.all()
     polygons = [p.Polygon for p in projects if p.Polygon]
     my_project = Project.objects.get(idProject=id)
-    polygon = my_project.Polygon
+    poolygon = my_project.Polygon
+    nodes = Node.objects.filter(polygon=poolygon)
     
     if request.method == 'POST':
         lat = request.POST.get('lat')
@@ -215,20 +224,36 @@ def step_four(request, id):
         new_data = Data(temperature=0, humidity=0, wind=0)
         new_data.save()
  
-        instancee = Node(point=point, ref=ref, Sensors=Sensors, Data=new_data)
+        instancee = Node(point=point, ref=ref, Sensors=Sensors, Data=new_data, polygon=poolygon)
         instancee.save()
 
-
-        polygon.node = instancee
-        polygon.save()
-
+        
+        my_project = Project.objects.get(idProject=id)
+        poolygon = my_project.Polygon
+        nodes = Node.objects.filter(polygon=poolygon)
+       
+        
 
 
         
         
-        return redirect('start')
+        return redirect('step_4', id=id)
     
-    return render(request, 'step_4.html', {'polygons': polygons, 'projects': projects, 'polygon': polygon})
+    return render(request, 'step_4.html', {'polygons': polygons, 'projects': projects, 'polygon': poolygon, 'nodes':nodes })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def update_weather(request, id):
     # get updated weather information
@@ -242,14 +267,14 @@ def update_weather(request, id):
     status = result(id)
     
 
-    node = polygon.node
+    node = Node.objects.filter(polygon=polygon).first()
     node.status = status
     node.save()
 
 
     
     
-    node = polygon.node
+    node = Node.objects.filter(polygon=polygon).first()
 
     status = node.status
     fwi = node.FWI
@@ -278,7 +303,7 @@ def show(request, seudo):
     print(nam)
     my_project = Project.objects.get(client=my_client)
     polygon = my_project.Polygon
-    node = polygon.node
+    node = Node.objects.filter(polygon=polygon).first()
     data = node.Data
     return render(request, 'show.html', {'polygon': polygon, 'node':node, 'data':data})
     

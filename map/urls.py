@@ -10,6 +10,7 @@ urlpatterns = [
     path('step_1', step_one, name='step_1'),
     path('step_2/<int:id>/', step_tow, name='step_2'),
     path('step_4/<int:id>/', step_four, name='step_4'),
+ 
     
     #path('', index, name='stocker_polygone'),
     #path('stocker_polygone/', stocker_polygone, name='stocker_polygone'),

@@ -7,7 +7,8 @@ from .views import *
 def result(id):
     my_project = Project.objects.get(idProject=id) 
     polygon = my_project.Polygon
-    node = polygon.node
+    node = Node.objects.filter(polygon=polygon).first()
+    #node = polygon.node
     fwi = node.FWI
 
     if fwi is not None and 0 <= fwi <= 7:
