@@ -110,7 +110,7 @@ var geojson_str = "{{ polygon.geom.json|escapejs }}";
 var geojson = JSON.parse(geojson_str);
 
 // Create a Leaflet map
-var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 10);
+var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
 
 
 L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {

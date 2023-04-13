@@ -266,7 +266,7 @@
 
 
 // Add all nodes to the map
- {% for node in nodes %}
+{% for node in nodes %}
     var marker = L.marker([{{ node.point.y }}, {{ node.point.x }}]).setBouncingOptions({
         bounceHeight : 50,    // height of the bouncing
         bounceSpeed  : 54,    // bouncing speed coefficient

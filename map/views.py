@@ -71,13 +71,7 @@ def polygon_detail(request, iid):
     polygon = my_project.Polygon
 
     nodes = Node.objects.filter(polygon=polygon)
-
-    #node = Node.objects.filter(polygon=polygon).first()
-    node0 = nodes[0]
-    node1 = nodes[1]
-    
     node = nodes[0]
-    data = node.Data
     print(node)  
     print(nodes)  
 
@@ -88,17 +82,11 @@ def polygon_detail(request, iid):
     #node = Node.objects.order_by('-Idnode').first()
     #polygon.node = node
     #polygon.save()
-
-    post = Data.objects.order_by('-IdData').first()
+    datas = Data.objects.filter(node=node).order_by('-IdData')
+    data = datas.first()
+    #data = Data.objects.order_by('-IdData').first()
     #start_mqtt_client(id)
 
-
-
-
-
-
-
-    
     temperature = data.temperature
     humidity = data.humidity
     wind_speed = data.wind
@@ -124,7 +112,7 @@ def polygon_detail(request, iid):
 
 
     
-    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'nodes':nodes, 'node':node, 'node0':node0, 'node1':node1, 'parm': data})
+    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'nodes':nodes, 'node':node, 'parm': data})
 
 
 
@@ -221,11 +209,23 @@ def step_four(request, id):
         
 
         # create a new Data object
-        new_data = Data(temperature=0, humidity=0, wind=0)
-        new_data.save()
+
  
-        instancee = Node(point=point, ref=ref, Sensors=Sensors, Data=new_data, polygon=poolygon)
+        instancee = Node(point=point, ref=ref, Sensors=Sensors, polygon=poolygon)
         instancee.save()
+
+
+        new_data = Data(temperature=0, humidity=0, wind=0, node=instancee)
+        new_data.save()
+    
+        datas = Data.objects.filter(node=instancee)
+        # datas_list = list(datas)
+        # datas_list.append(new_data)
+        # datas = Data.objects.filter(IdData__in=[d.IdData for d in datas_list])
+        print('hello')
+        print(datas)
+                
+
 
         
         my_project = Project.objects.get(idProject=id)
@@ -267,25 +267,33 @@ def update_weather(request, id):
     status = result(id)
     
 
-    node = Node.objects.filter(polygon=polygon).first()
+    nodes = Node.objects.filter(polygon=polygon)
+    node = nodes[0]
+
+
     node.status = status
     node.save()
 
 
     
-    
-    node = Node.objects.filter(polygon=polygon).first()
+    nodes = Node.objects.filter(polygon=polygon)
+    node = nodes[0]
+    #node = Node.objects.filter(polygon=polygon).first()
 
     status = node.status
     fwi = node.FWI
     rssi= node.RSSI
     cam=node.camera
-    Data = node.Data
+    #Data = node.Data
+    datas = Data.objects.filter(node=node).order_by('-IdData')
+    data = datas.first()
+        
+    
     # create a dictionary with the updated information
     data = {
-        'temperature': Data.temperature,
-        'humidity': Data.humidity,
-        'wind': Data.wind,
+        'temperature': data.temperature,
+        'humidity': data.humidity,
+        'wind': data.wind,
         'RSSI' : rssi,
         'camera' : cam,
         'fwi' : fwi,

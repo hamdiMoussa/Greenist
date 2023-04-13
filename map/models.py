@@ -33,16 +33,7 @@ from signup.models import supervisor
 #         return self.title
     
 
-class Data(models.Model):
-    IdData = models.AutoField(primary_key=True)
-    temperature = models.BigIntegerField()
-    humidity = models.BigIntegerField()
-    wind = models.BigIntegerField(default= 0)
-    
-    
-    
-    def __str__(self):
-        return f' Temperature: {self.temperature}, Humidity: {self.humidity}, wind: {self.wind}'
+
 
 
 
@@ -63,10 +54,10 @@ class Node(models.Model):
     FWI=models.BigIntegerField(null=True)
     camera = models.BigIntegerField(null=True)
     status = models.CharField(max_length=50, null=True)
-    Data = models.ForeignKey(Data, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
     polygon = models.ForeignKey(myPolygon, on_delete=models.CASCADE, null=True, related_name='nodes')
 
-   
+    def __str__(self):
+     return f'{self.Idnode}, polygone : {self.polygon}'  
 
 
 
@@ -78,7 +69,17 @@ class Node(models.Model):
     #supervisor = models.ForeignKey(supervisor, on_delete=models.CASCADE, null=True, related_name='%(class)s_related')
     
 
-
+class Data(models.Model):
+    IdData = models.AutoField(primary_key=True)
+    temperature = models.BigIntegerField()
+    humidity = models.BigIntegerField()
+    wind = models.BigIntegerField(default= 0)
+    node = models.ForeignKey(Node, on_delete=models.CASCADE, null=True, related_name='datas')
+    
+    
+    
+    def __str__(self):
+        return f' node : {self.node},Temperature: {self.temperature}, Humidity: {self.humidity}, wind: {self.wind}'
 
 
 

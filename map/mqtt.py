@@ -7,11 +7,21 @@ from django.conf import settings
 from .models import *
 import pyowm
 
+topics = ['v3/loraatest02@ttn/devices/eui-70b3d57ed005a5c4/up', 'v3/loraatest02@ttn/devices/eui-70b3d57ed005c92e/up', 'v3/loraatest02@ttn/devices/eui-2cf7f1c044900011/up']
+
 def on_connect(mqtt_client, userdata, flags, rc):
+
     if rc == 0:
         print('Connected successfully')
-        mqtt_client.subscribe('v3/loraatest02@ttn/devices/eui-70b3d57ed005a5c4/up')
-        mqtt_client.subscribe('v3/loraatest02@ttn/devices/eui-2cf7f1c044900011/up')
+        
+        #hamdi card
+        mqtt_client.subscribe(topics[0])
+
+        #yassmin card
+        mqtt_client.subscribe(topics[1])
+
+        #camera 
+        mqtt_client.subscribe(topics[2])
     else:
         print('Bad connection. Code:', rc)
 
@@ -21,18 +31,30 @@ def on_message(mqtt_client, userdata, msg, id):
     print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
 
 
-    if msg.topic == 'v3/loraatest02@ttn/devices/eui-2cf7f1c044900011/up':
+    if msg.topic == topics[2]:
         print(payload_dict)  # Add this line to check the content of payload_dict
         value = payload_dict['uplink_message']['decoded_payload']['measurement_value']
         valueee = value*10
         print('Measurement valueeeeeeeeeeeee:', valueee)
         my_project = Project.objects.get(idProject=id)
         polygon = my_project.Polygon
-        node = polygon.node
+        nodes = Node.objects.filter(polygon=polygon)
+        node = nodes[0]
         node.camera = valueee
         node.save()
 
     else:   
+        # for topic in topics {
+                        
+        #     my_project = Project.objects.get(idProject=id)
+        #     polygon = my_project.Polygon
+
+        #     nodes = Node.objects.filter(polygon=polygon)
+        #         for node in nodes {
+        #             if msg.topic == node.ref
+        #         }
+                   
+        # }
          # Get temperature and humidity values from payload
         temperature = payload_dict['uplink_message']['decoded_payload']['temperature']
         humidity = payload_dict['uplink_message']['decoded_payload']['humidity']
@@ -72,18 +94,27 @@ def on_message(mqtt_client, userdata, msg, id):
     
         my_project = Project.objects.get(idProject=id)
         polygon = my_project.Polygon
-        node = polygon.node
+
+        nodes = Node.objects.filter(polygon=polygon)
+        node = nodes[0]
+
         node.RSSI = rssi
         node.save()
 
+
+
+
+
         my_project = Project.objects.get(idProject=id)
         polygon = my_project.Polygon
-        node = polygon.node
-        data = node.Data
-        data.temperature = temperature
-        data.humidity = humidity
-        data.wind = wind_speed
-        data.save()
+
+        nodes = Node.objects.filter(polygon=polygon)
+        nodee = nodes[0]
+        
+        datas = Data.objects.filter(node=nodee)
+        new_data = Data.objects.create(temperature=temperature, humidity=humidity, wind=wind_speed, node=nodee)
+        #datas.append(new_data)
+        new_data.save()
 
 
 def start_mqtt_client(id):
