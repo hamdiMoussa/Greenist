@@ -47,11 +47,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
    
-
+    
     'map',
     'home',
     'signup',
     'login',
+    'MQTT',
+    
     
    
     

@@ -80,7 +80,7 @@
              </div>
              </div>
             </div>
-          
+         
           
 
            <form method="POST">
@@ -90,7 +90,7 @@
 
                   
                     <div class="row justify-content-left align-items-center">
-                      <div class="col-md-7 mt-5">
+                      <div class="col-md-4 mt-5">
                           <div class="card">
                               <div class="card-header text-center">
                                   <h5>Client Information</h5>
@@ -101,17 +101,125 @@
                                   <p><strong>End : </strong>{{ my_project.Date_end|date:"F d, Y" }}</p>
                               </div>
                           </div>
-
-                          <div class="col-md-7">
-                            <h2>Map</h2>
-                            
-                            <div class='col-7 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
-                              <div class="leaflet-control"></div>
-                           </div>
-
                       </div>
-                </div> 
+                  
+                      <div class="col-md-4 mt-5">
+                          <div class="card">
+                              <div class="card-header text-center">
+                              {% if my_project %}
+                              <h5><a href="{% url 'update' my_project.idProject %}">Weather Information</a></h5>
+                              {% endif %}
 
+                                  
+                              </div>
+                              <div id="weather-info">
+                                <div class="card-body">
+                                    <p><strong>Temperature:</strong> {{ ldn0.temperature }}°C</p>
+                                    <p><strong>Humidity:</strong> {{ ldn0.humidity }}%</p>
+                                    <p><strong>Wind Speed:</strong> {{ ldn0.wind }} km/h</p>
+                                </div>
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+                  
+
+
+
+
+
+                  <div class="row justify-content-left align-items-center">
+                    <div class="col-md-4 mt-5">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                <h5>Node Information</h5>
+                          
+                            </div>
+                            <br>
+                            <div class="card-body">
+                                <p><strong>Referance: </strong>{{ ldn0.node.ref }}</p>
+                                <p><strong>Sensors: </strong>{{ ldn0.node.Sensors }}</p>
+                                <p><strong>Duty Cycle: </strong>{{ 'Every 1 Min' }}</p>
+                                <div id="rssi">
+                                <p><strong>RSSI: </strong> {{ ldn0.node.RSSI }}</p>
+                                </div>
+                                <p><strong>Battery level: </strong>{{ ldn0.node.Battery_value }}%</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="col-md-4 mt-5">
+                      <div class="col  mt-2">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                
+                                <h5>Prediction result</h5>
+                                
+                            </div>
+                            
+                              <div class="card-body">
+                                <div id="fwi">
+                                <p><strong>FWI :</strong>{{ ldn0.node.FWI }}</p>
+                                </div>
+                                <div id="status">
+                                  {% if ldn0.node.status == 'DOWN' %}
+                                      <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif ldn0.node.status == 'MODERATE' %}
+                                      <p><strong>Status: </strong><span style="color:blue; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif ldn0.node.status == 'HIGH' %}
+                                      <p><strong>Status: </strong><span style="color:yellow; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif ldn0.node.status == 'VERY HIGH' %}
+                                      <p><strong>Status: </strong><span style="color:orange; font-weight:bold">{{ node.status }}</span></p>
+                                  {% elif ldn0.node.status == 'EXTREME' %}
+                                      <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ node.status }}</span></p>
+                                  {% endif %}
+                                  </div>
+                              </div>
+                          
+                        </div>
+                      </div> 
+
+                      <div class="col mt-2">
+                        <div class="card">
+                            <div class="card-header text-center">
+                                
+                                <h5>Detection result</h5>
+                                
+                            </div>
+                            <div id="status-card">
+                              <div class="card-body">
+                                {% if ldn0.node.camera == 0 %}
+                                    <p><strong>Status: </strong><span style="color:green; font-weight:bold">{{ 'NO FIRE' }}</span></p>
+                                {% elif ldn0.node.camera == 1 %}
+                                    <p><strong>Status: </strong><span style="color:red; font-weight:bold">{{ 'FIRE' }}</span></p>
+                               
+                                {% else %}
+                                    <p><strong>Status: </strong><span style="color:black; font-weight:bold">{{ 'NO NODE' }}</span></p>
+                                {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      </div> 
+                      
+                    </div>
+                </div>
+
+
+
+
+
+                 
+
+                 <div class="col-md-6">
+                  <h2>Map</h2>
+                  
+                  <div class='col-6 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+                    <div class="leaflet-control"></div>
+                 </div>
+                
+
+                 
+               
                  <label for="geom">Geometry:</label>
                  <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
 
@@ -141,11 +249,21 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
 
  <script>
+  //var client = "{{ client }}";
   var geojson_str = "{{ polygon.geom.json|escapejs }}";
   //console.log(geojson_str);
   var status = "{{ polygon.status }}";
   var geojson = JSON.parse(geojson_str);
   //console.log(geojson );
+
+
+      
+  //var polygonOne = JSON.stringify(first_coords);
+  
+  
+  
+  // Define the colors for the polygon based on status
+  var color = status === "Risk" ? "red" : "green";
 
   // Create a Leaflet map
   var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
@@ -160,15 +278,9 @@
   //var polygonLayer = L.geoJSON(geojson, { style: { color: color } }).addTo(map);
   
   // Add all nodes to the map
-  var fireIcon = L.icon({
-        iconUrl: '/static/images/fire3.png',
-        iconSize: [50, 50],
-        iconAnchor: [19, 19],
-        popupAnchor: [0, -19]
-        });
+
   
   {% for d in ldn %}
-  
       var coords = JSON.parse(geojson_str).coordinates;
   //var first_coords = coords[0][0];
   console.log("{{ d.node.range}}")
@@ -178,39 +290,32 @@
             coords[0][{{ d.node.range}}]
         ]
       };
-            var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> {{ d.node.status }} <br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>"
-            console.log(latest_data)
-            var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).bindPopup(latest_data).addTo(map);   
-            
-            
-            status = "{{ d.node.status}}" ;
-            console.log( status )
-            var color;
-                if (status == "DOWN") {
-                    color = "green";
-                } else if (status == "MODERATE") {
-                   color = "blue";
-                } else if (status == "HIGH") {
-                    color = "yellow";
-                } else if (status == "VERY HIGH") {
-                    color = "orange";
-                } else if (status == "EXTREME") {
-                    color = "red";
-                    marker.setIcon(fireIcon);
-                    marker.bounce(-1);
-                } else {
-                    color = "black";
-                }
 
-      var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
-      polygonLayer.setStyle({ color: color });
-      polygonLayer.bindTooltip("Polygon " + ( {{d.node.range}} + 1));
-
-
+      var polygonLayer = L.geoJSON(polygonOne, { style: { color: color } }).addTo(map);
+      var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>"
+      console.log(latest_data)
+      var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).bindPopup(latest_data).addTo(map);
   {% endfor %}
     
 
+    
 
+
+  //var geojson_node_str = "{{ node.point.json|escapejs }}";
+ // var geojson_node = JSON.parse(geojson_node_str);
+ // L.geoJSON(geojson_node).addTo(map);
+   // Define the fire icon
+   var fireIcon = L.icon({
+    iconUrl: '/static/images/fire3.png',
+    iconSize: [50, 50],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -19]
+});
+
+
+  
+  // Add the client name to the page
+ // document.getElementById('client').innerHTML = client;
 </script>
 
 
@@ -219,7 +324,7 @@
 
 
 
- <!-- <script>
+ <script>
   
    $(document).ready(function() {
        setInterval(function() {
@@ -227,7 +332,7 @@
                url: "{% url 'update_weather' my_project.idProject %}",
                type: "GET",
                success: function(data_list) {
-                data = data_list[0];
+                data = data_list[1];
                 status = data.node.status;
                 if (status === "DOWN") {
                     color = "green";
@@ -258,9 +363,9 @@
                       marker.setIcon(null);
                       marker.stopBouncing();
                      }
+                     
 
-
-
+                     
                    $('#weather-info').html(
                        '<div class="card-body">' +
                           '<p><strong>Temperature:</strong> ' + data.temperature + '°C</p>' +
@@ -313,7 +418,7 @@
        }, 5000); // refresh every 5 seconds
    });
   </script>
-   -->
+  
   
   
   

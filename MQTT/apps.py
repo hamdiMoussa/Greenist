@@ -1,8 +1,9 @@
 from django.apps import AppConfig
 
 
-class SignupConfig(AppConfig):
+class MqttConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'signup'
+    name = 'MQTT'
+
 
 

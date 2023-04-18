@@ -4,10 +4,11 @@ from .views import *
 
 
 
-def result(id):
-    my_project = Project.objects.get(idProject=id) 
-    polygon = my_project.Polygon
-    node = Node.objects.filter(polygon=polygon).first()
+def result(idnode):
+    # my_project = Project.objects.get(idProject=id) 
+    # polygon = my_project.Polygon
+    # nodes = Node.objects.filter(polygon=polygon)
+    node = Node.objects.get(Idnode=idnode)
     #node = polygon.node
     fwi = node.FWI
 

@@ -63,6 +63,18 @@
                   <input type="text" id="client" name="Sensors"  class="form-control" placeholder="Enter the Sensors type">
                  </div>
                 </div>
+
+
+                <div class="row">
+                  <div class="col-md-5">
+                   <label for="project-name">Node rande</label>
+                   <input type="text" id="range" name="range" class="form-control" placeholder="Enter Node range">
+                  </div>
+                  <div class="col-md-5">
+                    <br>
+                    <button type="submit" class="btn btn-dark" style='width:50%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Add New Node</button>
+                  </div>
+                 </div>
                  
                  
                
@@ -71,7 +83,7 @@
                <div class="col-md-6">
 
                 <h2>Map</h2>
-                <input type="text" name="piont" id="id_point">
+                
                 <div class='col-6 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px; border: 1px solid rgb(9, 0, 0) ;">
                   <input type="hidden" name="lat" id="lat">
                   <input type="hidden" name='lng' id="lng">
@@ -87,10 +99,7 @@
 
               <br><br>
 
-                <div class="text-center">
-                  <button type="submit" class="btn btn-dark" style='width:50%; background-color: #A26A25; color:#2B2612; font-size: 15px;'>Add New Node</button>
-        
-              </div>
+
               
 
   
@@ -110,7 +119,7 @@ var geojson_str = "{{ polygon.geom.json|escapejs }}";
 var geojson = JSON.parse(geojson_str);
 
 // Create a Leaflet map
-var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 14);
+var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 10);
 
 
 L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -119,6 +128,30 @@ L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/M
 
 // Add the GeoJSON polygon to the map
 L.geoJSON(geojson).addTo(map);
+
+
+
+
+
+/*
+
+ var coords = JSON.parse(geojson_str).coordinates;
+ console.log(coords);
+ var aa= coords[0].length;
+ console.log(aa);
+ {% for i in aa %}
+    //var coords = JSON.parse(geojson_str).coordinates;
+    var polygonCoords = coords[0][i];
+    console.log(polygonCoords);
+    var polygonOne = { 
+      "type": "Polygon",
+      "coordinates": [polygonCoords]
+    };
+    var polygonLayer = L.geoJSON(polygonOne, { style: { fillOpacity: 0.5 } }).addTo(map);
+    polygonLayer.bindTooltip("Polygon " + (i + 1));
+ {% endfor %}
+
+*/
 
 {% for node in nodes %}
     var marker = L.marker([{{ node.point.y }}, {{ node.point.x }}]).addTo(map);

@@ -9,7 +9,7 @@ from .models import *
 from django.contrib.gis.geos import GEOSGeometry
 
 import pyowm
-from .mqtt import start_mqtt_client
+from .mqtt import *
 from signup.models import client
 
 from django.contrib.gis.geos import GEOSGeometry
@@ -57,7 +57,7 @@ def weather(request):
 
 def start_mqtt(request, id):
     # Start the MQTT client
-    start_mqtt_client(id)
+    #start_mqtt_client(id)
     
     # Return a simple response to indicate that the client has started
     #return HttpResponse('MQTT client started successfully.')
@@ -69,50 +69,61 @@ def polygon_detail(request, iid):
     #polygons = [p.Polygon for p in projects if p.Polygon]
     #polygons = myPolygon.objects.all()
     polygon = my_project.Polygon
-
     nodes = Node.objects.filter(polygon=polygon)
-    node = nodes[0]
-    print(node)  
-    print(nodes)  
+    
+     
+      
+    data_list = []
+    for n in nodes :
+        ds = Data.objects.filter(node=n).order_by('-IdData').first()
+        data_list.append(
+            ds,
+        )
 
+    for i in range(len(data_list)):
+        ldn0 = data_list[i]
+        #node = ldn0.node
+        print(ldn0)
+        dd = ldn0.wind
+        print(dd)
 
+        temperature = ldn0.temperature
+        humidity = ldn0.humidity
+        wind_speed = ldn0.wind
 
+        with open('testBatch.csv', mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
 
-       # get the last Node object and save it to the polygon
+        batchFWI('testBatch.csv')
+
+        with open('testBatch.csv', mode='r') as file:
+            reader = csv.reader(file)
+            rows = list(reader)
+            last_row = rows[-1]
+            FWI = last_row[-1]
+
+        fwi = float(FWI)
+        ldn0.node.FWI=fwi
+        ldn0.node.save()
+        resultatt= result(ldn0.node.Idnode)
+        print (resultatt)
+        ldn0.node.status=resultatt
+        ldn0.node.save()
+
+           # get the last Node object and save it to the polygon
     #node = Node.objects.order_by('-Idnode').first()
     #polygon.node = node
     #polygon.save()
-    datas = Data.objects.filter(node=node).order_by('-IdData')
-    data = datas.first()
+    #datas = Data.objects.filter(node=node).order_by('-IdData')
+    #data = Data.objects.filter(node=ldn0.node).order_by('-IdData').first()
+    
+    
     #data = Data.objects.order_by('-IdData').first()
     #start_mqtt_client(id)
 
-    temperature = data.temperature
-    humidity = data.humidity
-    wind_speed = data.wind
-
-
-    with open('testBatch.csv', mode='a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
-
-
-    batchFWI('testBatch.csv')
-
-
-    with open('testBatch.csv', mode='r') as file:
-        reader = csv.reader(file)
-        rows = list(reader)
-        last_row = rows[-1]
-        FWI = last_row[-1]
     
-    fwi = float(FWI)
-    node.FWI=fwi
-    node.save()
-
-
-    
-    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'nodes':nodes, 'node':node, 'parm': data})
+    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'ldn':data_list})
 
 
 
@@ -201,6 +212,8 @@ def step_four(request, id):
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
         ref = request.POST.get('ref')
+        range_str = request.POST.get('range')
+        range = int(range_str) - 1
         Sensors = request.POST.get('Sensors')
         print(lat,lng)
         point = Point(x=float(lng), y=float(lat))
@@ -211,7 +224,7 @@ def step_four(request, id):
         # create a new Data object
 
  
-        instancee = Node(point=point, ref=ref, Sensors=Sensors, polygon=poolygon)
+        instancee = Node(point=point, ref=ref, range=range, Sensors=Sensors, polygon=poolygon)
         instancee.save()
 
 
@@ -249,59 +262,92 @@ def step_four(request, id):
 
 
 
-
-
-
-
-
-
 def update_weather(request, id):
-    # get updated weather information
-
-
-
-
     my_project = Project.objects.get(idProject=id) 
     polygon = my_project.Polygon
-
-    status = result(id)
-    
-
-    nodes = Node.objects.filter(polygon=polygon)
-    node = nodes[0]
-
-
-    node.status = status
-    node.save()
-
-
     
     nodes = Node.objects.filter(polygon=polygon)
-    node = nodes[0]
-    #node = Node.objects.filter(polygon=polygon).first()
+    data_list = []
+    for n in nodes:
+        ds = Data.objects.filter(node=n).order_by('-IdData').first()
+        data_list.append({
+            'node': {
+                'id': n.Idnode,
+                'status': result(id, n.Idnode),
+                'camera': n.camera,
+                'fwi': n.FWI,
+                'RSSI': n.RSSI,
+            },
+            'temperature': ds.temperature,
+            'humidity': ds.humidity,
+            'wind': ds.wind,
+        })
+    #ldn0 = data_list.node
+    #print(ldn0)
+    data = data_list[0]
+    print(data['node']['status'])
 
-    status = node.status
-    fwi = node.FWI
-    rssi= node.RSSI
-    cam=node.camera
-    #Data = node.Data
-    datas = Data.objects.filter(node=node).order_by('-IdData')
-    data = datas.first()
+    return JsonResponse(data_list, safe=False)
+
+
+
+
+
+
+
+# def update_weather(request, id):
+#     # get updated weather information
+
+
+
+
+#     my_project = Project.objects.get(idProject=id) 
+#     polygon = my_project.Polygon
+
+    
+    
+
+#     nodes = Node.objects.filter(polygon=polygon)
+#     data_list = []
+#     for n in nodes :
+#         ds = Data.objects.filter(node=n).order_by('-IdData').first()
+#         data_list.append(
+#             ds,
+#         )
+#         status = result(id, n.Idnode)
+#         n.status = status
+#         n.save()
+        
+#     print(data_list)
+#     ldn0 = data_list[0]
+#     print(ldn0)
+#     print(ldn0.node)
+#     node = ldn0.node
+
+#     #node = Node.objects.filter(polygon=polygon).first()
+
+#     status = node.status
+#     fwi = node.FWI
+#     rssi= node.RSSI
+#     cam=node.camera
+#     # #Data = node.Data
+#     # datas = Data.objects.filter(node=node).order_by('-IdData')
+#     # data = datas.first()
         
     
-    # create a dictionary with the updated information
-    data = {
-        'temperature': data.temperature,
-        'humidity': data.humidity,
-        'wind': data.wind,
-        'RSSI' : rssi,
-        'camera' : cam,
-        'fwi' : fwi,
-        'status' : status,
-        }
+#     # create a dictionary with the updated information
+#     data = {
+#         'temperature': ldn0.temperature,
+#         'humidity': ldn0.humidity,
+#         'wind': ldn0.wind,
+#         'RSSI' : rssi,
+#         'camera' : cam,
+#         'fwi' : fwi,
+#         'status' : status,
+#         }
 
-    # return a JsonResponse with the updated data
-    return JsonResponse(data)
+#     # return a JsonResponse with the updated data
+#     return JsonResponse(data_list)
 
 
 
