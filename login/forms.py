@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from signup.models import *
 
 
 class LoginForm(forms.Form):
@@ -49,3 +50,4 @@ class LoginForm(forms.Form):
         else:
             self.add_error("pseudo", "Ce compte n'existe pas.")
         return super(LoginForm, self).is_valid()
+

@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import *
 from . import views
+from . import consumers
+
 
 urlpatterns = [
 
@@ -11,7 +13,7 @@ urlpatterns = [
     path('step_2/<int:id>/', step_tow, name='step_2'),
     path('step_4/<int:id>/', step_four, name='step_4'),
  
-    
+    #path('ws/<int:polygon_id>/', consumers.PolygonConsumer.as_asgi()),
     #path('', index, name='stocker_polygone'),
     #path('stocker_polygone/', stocker_polygone, name='stocker_polygone'),
     #path('', views.stocker_polygone, name='stocker_polygone'),
@@ -22,3 +24,5 @@ urlpatterns = [
     path('update_weather/<int:id>/', views.update_weather, name='update_weather'),
     
 ]
+
+

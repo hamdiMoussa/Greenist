@@ -123,7 +123,7 @@ def polygon_detail(request, iid):
     #start_mqtt_client(id)
 
     
-    return render(request, 'polygon_detail.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'ldn':data_list})
+    return render(request, 'polygon_detail03.html', {'projects': projects, 'my_project' : my_project, 'polygon': polygon, 'ldn':data_list})
 
 
 
@@ -178,7 +178,7 @@ def stocker_polygone(request, id):
     polygons = [p.Polygon for p in projects if p.Polygon]
     if request.method == 'POST':
         Prject_name = request.POST.get('nom') 
-        Client_name = request.POST.get('client')      
+        # Client_name = request.POST.get('client')      
         polygonString = request.POST.get('points')
         print(polygonString)
         polygon = GEOSGeometry(polygonString, srid=4326)
@@ -263,31 +263,47 @@ def step_four(request, id):
 
 
 def update_weather(request, id):
+    # my_project = Project.objects.get(idProject=id) 
+    # polygon = my_project.Polygon
+
+
+    projects = Project.objects.all()
     my_project = Project.objects.get(idProject=id) 
+    #polygons = [p.Polygon for p in projects if p.Polygon]
+    #polygons = myPolygon.objects.all()
     polygon = my_project.Polygon
-    
     nodes = Node.objects.filter(polygon=polygon)
-    data_list = []
+    
+    data = []
     for n in nodes:
         ds = Data.objects.filter(node=n).order_by('-IdData').first()
-        data_list.append({
+        data.append({
             'node': {
                 'id': n.Idnode,
-                'status': result(id, n.Idnode),
+                'status': result(n.Idnode),
                 'camera': n.camera,
                 'fwi': n.FWI,
                 'RSSI': n.RSSI,
+                'range': n.range,
+                'x': n.point.x,
+                'y': n.point.y,
+                'ref': n.ref,
             },
             'temperature': ds.temperature,
             'humidity': ds.humidity,
             'wind': ds.wind,
         })
+    print(data)
     #ldn0 = data_list.node
     #print(ldn0)
-    data = data_list[0]
-    print(data['node']['status'])
-
-    return JsonResponse(data_list, safe=False)
+    # data = data_list[0]
+    # print(data['node']['status'])
+    # data = {
+    #     # "geojson_str": geojson_str,
+    #     # "polygon_status": polygon_status,
+    #     "ldn": ldn,
+    # }
+    return JsonResponse(data, safe=False)
 
 
 
@@ -357,9 +373,17 @@ def show(request, seudo):
     print(nam)
     my_project = Project.objects.get(client=my_client)
     polygon = my_project.Polygon
-    node = Node.objects.filter(polygon=polygon).first()
-    data = node.Data
-    return render(request, 'show.html', {'polygon': polygon, 'node':node, 'data':data})
+    nodes = Node.objects.filter(polygon=polygon)
+    
+     
+      
+    data_list = []
+    for n in nodes :
+        ds = Data.objects.filter(node=n).order_by('-IdData').first()
+        data_list.append(
+            ds,
+        )
+    return render(request, 'show.html', {'polygon': polygon, 'ldn':data_list ,'my_project' : my_project})
     
 
 

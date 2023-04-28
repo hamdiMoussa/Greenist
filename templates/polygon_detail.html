@@ -201,11 +201,39 @@
                 } else {
                     color = "black";
                 }
+            // var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> <span style='color:" + color + ";'>" + status + "</span><br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>";
+            // console.log(latest_data);
+            // var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).bindPopup(latest_data).addTo(map);       
 
       var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
       polygonLayer.setStyle({ color: color });
       polygonLayer.bindTooltip("Polygon " + ( {{d.node.range}} + 1));
-
+      
+      // Send node data to server over websocket
+      var nodeData = {
+          'nodeRef': "{{ d.node.ref }}",
+          'lat': "{{ d.node.point.y }}",
+          'lng': "{{ d.node.point.x }}",
+          'status': "{{ d.node.status }}",
+          'range': "{{ d.node.range }}",
+          'temperature': "{{ d.temperature }}",
+          'humidity': "{{ d.humidity }}",
+          'wind_speed': "{{ d.wind }}",
+          'fwi': "{{ d.node.FWI }}",
+          'rssi': "{{ d.node.RSSI }}",
+          'camera': "{{ d.node.camera }}",
+          'timestamp': "{{ d.timestamp }}",
+          };
+          console.log(nodeData);
+          var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+          var ws = new WebSocket(ws_scheme + '://' + window.location.host + "/ws/");
+          ws.onopen = function(event) {
+          ws.send(JSON.stringify(nodeData));
+          };
+          ws.onmessage = function(event) {
+          console.log(event.data);
+          };
+          console.log("nodeData");
 
   {% endfor %}
     

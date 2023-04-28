@@ -48,43 +48,108 @@
 
 
 
- <script>
-  var client = "{{ client }}";
-  var geojson_str = "{{ polygon.geom.json|escapejs }}";
-  var status = "{{ polygon.status }}";
-  var geojson = JSON.parse(geojson_str);
+ 
 
-  // Define the colors for the polygon based on status
-  var color = status === "Risk" ? "red" : "green";
+<script>
+
+  var geojson_str = "{{ polygon.geom.json|escapejs }}";
+  var geojson = JSON.parse(geojson_str);
+  //console.log(geojson_str);
+  //var status = "{{ polygon.status }}";
+
+  //console.log(geojson );
 
   // Create a Leaflet map
-  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 13);
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
 
-  L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+   L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
     }).addTo(map);
-  
-  // Add the GeoJSON polygon to the map
-  L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+ $(document).ready(function() {
+    setInterval(function() {
+    $.ajax({
+        url: "{% url 'update_weather' my_project.idProject %}",
+        type: 'GET',
+        success: function(data) {
+            // Create a Leaflet map
+            //var map = L.map('map').setView([35, 9.5], 12);
+            //map.setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
+            // Add a tile layer to the map
+            // L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            //     attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            // }).addTo(map);
+            // console.log("helo")
 
-  
-  // Add the GeoJSON node to the map
-  var geojson_node_str = "{{ node.point.json|escapejs }}";
-  var geojson_node = JSON.parse(geojson_node_str);
-  
+            // Parse the GeoJSON string
+            //var geojson = JSON.parse(data.geojson_str);
 
-  var polygonLayer = L.geoJSON(geojson_node).addTo(map);
+            // Add the GeoJSON polygon to the map
+            //L.geoJSON(geojson, { style: { color: data.polygon_status } }).addTo(map);
 
-  // Add a popup to the polygon
-  
-  polygonLayer.bindPopup('Temperature: ' + {{ data.temperature }} + '°C <br>Humidity: ' + {{ data.humidity }} + '% <br>Wind: ' + {{ data.wind }} + 'km/h ');
-  
-  // Add the client name to the page
-  document.getElementById('client').innerHTML = client;
-</script>
+            // Add all nodes to the map
+            var fireIcon = L.icon({
+                iconUrl: '/static/images/fire3.png',
+                iconSize: [50, 50],
+                iconAnchor: [19, 19],
+                popupAnchor: [0, -19]
+            });
+            
+            for (var i = 0; i < data.length; i++) {
+                console.log("helooooo")
+                
+                var d = data[i]
+                var coords = JSON.parse(geojson_str).coordinates;
+                //var first_coords = coords[0][0];
+                var r = d.node.range;
+                console.log(r)
+                    var polygonOne = { 
+                      "type": "Polygon",
+                      "coordinates": [
+                          coords[0][r]    
+                      ]
+                    };
+              
+             status = d.node.status; ;
+             console.log( status )
+             var color;
+                if (status == "DOWN") {
+                    color = "green";
+                } else if (status == "MODERATE") {
+                   color = "blue";
+                } else if (status == "HIGH") {
+                    color = "yellow";
+                } else if (status == "VERY HIGH") {
+                    color = "orange";
+                } else if (status == "EXTREME") {
+                    color = "red";
+                    marker.setIcon(fireIcon);
+                    marker.bounce(-1);
+                } else {
+                    color = "black";
+                }
+       
+
+            //  var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
+            //  console.log("helooooo")
+            var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
+            polygonLayer.setStyle({ color: color });
+            polygonLayer.bindTooltip("Polygon " + ( d.node.range + 1));
 
 
+            var marker = L.marker([ d.node.y ,  d.node.x ]).addTo(map);
+            var latest_data = "<strong>Ref:</strong> "+  d.node.ref +" <br> <strong>RSSI:</strong> "+ d.node.RSSI  +" <br> <strong>FWI:</strong> " +  d.node.fwi +" <br> <strong>Predection result:</strong> <span style='color:" + color + ";'>" + status + "</span><br><strong>Detection Result:</strong> " +  d.node.camera  +" <br> <br><strong>Temperature:</strong> "+  d.temperature +" <br> <strong>Humidity:</strong>"+  d.humidity +" <br> <strong>Wind_speed:</strong> "+ d.wind +" <br>";
+            console.log(latest_data);
+            marker.bindPopup(latest_data).addTo(map); 
 
+            }
+          },
+               error: function(xhr, status, error) {
+                   console.log("An error occurred: " + xhr.status + " " + xhr.statusText);
+               }
+           });
+       }, 5000); // refresh every 5 seconds
+   });
+  </script>
 
  
 

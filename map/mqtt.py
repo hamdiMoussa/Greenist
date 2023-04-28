@@ -28,13 +28,13 @@ def on_connect(mqtt_client, userdata, flags, rc):
 def on_message(mqtt_client, userdata, msg):
     # Decode the incoming message
     payload_dict =json.loads(msg.payload)
-    print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
+    #print(f'Received message on topic: {msg.topic} with payload: {msg.payload}')
 
     if msg.topic == topics[2]:
         print(payload_dict)  # Add this line to check the content of payload_dict
         value = payload_dict['uplink_message']['decoded_payload']['measurement_value']
         valueee = value*10
-        print('Measurement valueeeeeeeeeeeee:', valueee)
+        #print('Measurement valueeeeeeeeeeeee:', valueee)
         # my_project = Project.objects.get(idProject=id)
         # polygon = my_project.Polygon
         nodes = Node.objects.all()
@@ -55,7 +55,7 @@ def on_message(mqtt_client, userdata, msg):
                     rssi = payload_dict['uplink_message']['rx_metadata'][0]['rssi']
                     snr = payload_dict['uplink_message']['rx_metadata'][0]['snr']
 
-                    print('temperature :', temperature, 'humidity :', humidity, 'rssi :', rssi, 'snr :', snr, '\n')
+                    #print('temperature :', temperature, 'humidity :', humidity, 'rssi :', rssi, 'snr :', snr, '\n')
                     # Replace "YOUR_API_KEY" with your actual API key from OpenWeatherMap
                     owm = pyowm.OWM("0f21fa98b6e075b77fd85b3af087e294")
     
@@ -69,7 +69,7 @@ def on_message(mqtt_client, userdata, msg):
                     humidity_owm = weather.humidity
                     wind_speed = weather.wind()['speed']
 
-                    print('temperature :', temperature, 'humidity :', humidity, 'wind :', wind_speed, '\n')
+                    print('temperature :', temperature, 'humidity :', humidity, 'wind :', wind_speed, 'rssi :', rssi, 'snr :', snr, '\n')
                     # Create a new Post object and save it to the database
 
                     node.RSSI = rssi

@@ -1,0 +1,323 @@
+
+{% extends 'base.html' %} 
+
+{% block content %} 
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Markers Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" 
+    integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" 
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
+   
+    <!-- Leaflet Draw CSS and JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+
+    <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha384-6DBIkDzKj1PHw3gW8skvQoAQ5KoG5ru5Ot1WmYvFxBn96yO9SB+4+W4A7WuL4izU"
+    crossorigin=""/>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" integrity="sha512-1xhdQwMzS8Ly+5ZCvSk/Z9oGt92uI1FUpy2+vcD7zTkXXw06ivV8WgZ+flv7dX9tMJPCT8YENWQOv+7OxNwHvw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js" integrity="sha512-PnX6fRPjq/LiYD6rsRv6LZx6PZyoLCejr3q1ZDDtzAVT9T1TzT8OGpVEyTjjntPtd+bGwIzgm1orDjZi2QX6UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
+
+
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/gh/hosuaby/Leaflet.SmoothMarkerBouncing@v3.0.2/dist/bundle.js"
+        crossorigin="anonymous"></script>
+
+        <style>
+          html, body, #map {
+              height: 100%;
+              margin: 0;
+              padding: 0;
+          }
+      </style>
+  </head>
+  <body  style="background-color:#e9d58b; ">
+    <div class="container-fluid">
+      <div class="row flex-nowrap">
+        <div class="col-3">
+          <!-- Sidebar -->
+          <div class="card mb-3">
+            <div class="card-header">
+              <h5 class="card-title" style="text-align:center; color:rgb(51, 77, 4);">Projects</h5>
+             </div>
+             <div class="card-body">
+              <div class="card mb-2">
+                <div class="card-body">
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #A26A25; color:#2B2612; font-size: 15px;' onclick="location.href='{% url 'start' %}'">Add New Project</button>
+                </div>
+              </div>
+              {% for project in projects %}
+              <div class="card mb-2 " style="background-color: #d4d6d8; display: flex; flex-direction: column;">
+                <div class="card-body text-vert">
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Prject name: {{ project.nom }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">Client name: {{ project.client }}</h6>
+                  <h6 class="card-subtitle mb-2 text-muted" style="text-align:center; color:rgb(51, 77, 4);">ID: {{ project.idProject}}</h6>
+                  <button class="btn btn-dark  mx-auto d-block" style=' background-color: #e9d58b; color:#2B2612; font-size: 12px;' onclick="location.href='{% url 'polygon_detail' project.idProject %}'">View all detail</button>
+                </div>
+              </div>
+              {% endfor %}
+             </div>
+             </div>
+            </div>
+          
+          
+
+           <form method="POST">
+             {% csrf_token %}
+               
+             <h1>Details of : {{ my_project.nom }}</h1>
+
+                  
+                    <div class="row justify-content-left align-items-center">
+                      <div class="col-md-7 mt-5">
+                          <div class="card">
+                              <div class="card-header text-center">
+                                  <h5>Client Information</h5>
+                              </div>
+                              <div class="card-body">
+                                  <p><strong>Client: </strong>{{ my_project.client }}</p>
+                                  <p><strong>Start : </strong>{{ my_project.Date_start }}</p>
+                                  <p><strong>End : </strong>{{ my_project.Date_end|date:"F d, Y" }}</p>
+                              </div>
+                          </div>
+
+                          <div class="col-md-7">
+                            <h2>Map</h2>
+                            
+                            <div class='col-7 rounded ' id="map" style="width: 800px;height: 500px; box-sizing:border-box; margin-top: 20px;  border-radius: 50px;">
+                              <div class="leaflet-control"></div>
+                           </div>
+
+                      </div>
+                </div> 
+
+                 <label for="geom">Geometry:</label>
+                 <input type="text" id="geom" name="geom" value="{{ polygon.geom }}" readonly><br><br>
+
+             
+    
+                
+                
+            </form>
+         
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+ <script src="{% static 'js/map.js' %}"></script>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
+
+
+
+<!-- 
+
+<script>
+  
+
+
+
+  var geojson_str = "{{ polygon.geom.json|escapejs }}";
+  //console.log(geojson_str);
+  var status = "{{ polygon.status }}";
+  var geojson = JSON.parse(geojson_str);
+  //console.log(geojson );
+
+  // Create a Leaflet map
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
+
+   L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(map);
+  
+  // Add the GeoJSON polygon to the map
+  //L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+
+  //var polygonLayer = L.geoJSON(geojson, { style: { color: color } }).addTo(map);
+  
+  // Add all nodes to the map
+  var fireIcon = L.icon({
+        iconUrl: '/static/images/fire3.png',
+        iconSize: [50, 50],
+        iconAnchor: [19, 19],
+        popupAnchor: [0, -19]
+        });
+  
+  {% for d in ldn %}
+  
+      var coords = JSON.parse(geojson_str).coordinates;
+  //var first_coords = coords[0][0];
+  
+  var i = "{{ d.node.range}}"
+  console.log(i)
+      var polygonOne = { 
+        "type": "Polygon",
+        "coordinates": [
+            coords[0][{{ d.node.range}}]
+        ]
+      };
+      // var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> {{ d.node.status }} <br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>"
+      // console.log(latest_data)
+      var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).addTo(map);
+      // var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> <span style='color:" + color + ";'>" + status + "</span><br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>";
+      // console.log(latest_data);
+      // var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).bindPopup(latest_data).addTo(map);       
+
+      var polygonLayer = L.geoJSON(polygonOne).addTo(map);
+      // polygonLayer.setStyle({ color: color });
+      // polygonLayer.bindTooltip("Polygon " + ( {{d.node.range}} + 1));
+
+
+
+  {% endfor %}
+    
+
+
+</script> -->
+
+
+
+
+
+
+
+<script>
+
+  var geojson_str = "{{ polygon.geom.json|escapejs }}";
+  var geojson = JSON.parse(geojson_str);
+  //console.log(geojson_str);
+  //var status = "{{ polygon.status }}";
+
+  //console.log(geojson );
+
+  // Create a Leaflet map
+  var map = L.map('map').setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
+
+   L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    }).addTo(map);
+ $(document).ready(function() {
+    setInterval(function() {
+    $.ajax({
+        url: "{% url 'update_weather' my_project.idProject %}",
+        type: 'GET',
+        success: function(data) {
+            // Create a Leaflet map
+            //var map = L.map('map').setView([35, 9.5], 12);
+            //map.setView([{{ polygon.geom.centroid.y }}, {{ polygon.geom.centroid.x }}], 12);
+            // Add a tile layer to the map
+            // L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            //     attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            // }).addTo(map);
+            // console.log("helo")
+
+            // Parse the GeoJSON string
+            //var geojson = JSON.parse(data.geojson_str);
+
+            // Add the GeoJSON polygon to the map
+            //L.geoJSON(geojson, { style: { color: data.polygon_status } }).addTo(map);
+
+            // Add all nodes to the map
+            var fireIcon = L.icon({
+                iconUrl: '/static/images/fire3.png',
+                iconSize: [50, 50],
+                iconAnchor: [19, 19],
+                popupAnchor: [0, -19]
+            });
+            
+            for (var i = 0; i < data.length; i++) {
+                console.log("helooooo")
+                
+                var d = data[i]
+                var coords = JSON.parse(geojson_str).coordinates;
+                //var first_coords = coords[0][0];
+                var r = d.node.range;
+                console.log(r)
+                    var polygonOne = { 
+                      "type": "Polygon",
+                      "coordinates": [
+                          coords[0][r]    
+                      ]
+                    };
+              
+             status = d.node.status; ;
+             console.log( status )
+             var color;
+                if (status == "DOWN") {
+                    color = "green";
+                } else if (status == "MODERATE") {
+                   color = "blue";
+                } else if (status == "HIGH") {
+                    color = "yellow";
+                } else if (status == "VERY HIGH") {
+                    color = "orange";
+                } else if (status == "EXTREME") {
+                    color = "red";
+                    marker.setIcon(fireIcon);
+                    marker.bounce(-1);
+                } else {
+                    color = "black";
+                }
+       
+
+            //  var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
+            //  console.log("helooooo")
+            var polygonLayer = L.geoJSON(polygonOne, { style: { color: color, fillOpacity: 0.5 } }).addTo(map);
+            polygonLayer.setStyle({ color: color });
+            polygonLayer.bindTooltip("Polygon " + ( d.node.range + 1));
+
+
+            var marker = L.marker([ d.node.y ,  d.node.x ]).addTo(map);
+            var latest_data = "<strong>Ref:</strong> "+  d.node.ref +" <br> <strong>RSSI:</strong> "+ d.node.RSSI  +" <br> <strong>FWI:</strong> " +  d.node.fwi +" <br> <strong>Predection result:</strong> <span style='color:" + color + ";'>" + status + "</span><br><strong>Detection Result:</strong> " +  d.node.camera  +" <br> <br><strong>Temperature:</strong> "+  d.temperature +" <br> <strong>Humidity:</strong>"+  d.humidity +" <br> <strong>Wind_speed:</strong> "+ d.wind +" <br>";
+            console.log(latest_data);
+            marker.bindPopup(latest_data).addTo(map); 
+
+            }
+          },
+               error: function(xhr, status, error) {
+                   console.log("An error occurred: " + xhr.status + " " + xhr.statusText);
+               }
+           });
+       }, 5000); // refresh every 5 seconds
+   });
+  </script>
+  
+  
+
+</body>
+</html>
+
+{% endblock %}
+
+  
+  
+  
+  
+ 
