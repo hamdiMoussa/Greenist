@@ -79,37 +79,37 @@ def polygon_detail(request, iid):
         data_list.append(
             ds,
         )
+    # print(data_list)
+    # for i in range(len(data_list)):
+    #     ldn0 = data_list[i]
+    #     #node = ldn0.node
+    #     print(ldn0)
+    #     dd = ldn0.wind
+    #     print(dd)
 
-    for i in range(len(data_list)):
-        ldn0 = data_list[i]
-        #node = ldn0.node
-        print(ldn0)
-        dd = ldn0.wind
-        print(dd)
+    #     temperature = ldn0.temperature
+    #     humidity = ldn0.humidity
+    #     wind_speed = ldn0.wind
 
-        temperature = ldn0.temperature
-        humidity = ldn0.humidity
-        wind_speed = ldn0.wind
+    #     with open('testBatch.csv', mode='a', newline='') as file:
+    #         writer = csv.writer(file)
+    #         writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
 
-        with open('testBatch.csv', mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
+    #     batchFWI('testBatch.csv')
 
-        batchFWI('testBatch.csv')
+    #     with open('testBatch.csv', mode='r') as file:
+    #         reader = csv.reader(file)
+    #         rows = list(reader)
+    #         last_row = rows[-1]
+    #         FWI = last_row[-1]
 
-        with open('testBatch.csv', mode='r') as file:
-            reader = csv.reader(file)
-            rows = list(reader)
-            last_row = rows[-1]
-            FWI = last_row[-1]
-
-        fwi = float(FWI)
-        ldn0.node.FWI=fwi
-        ldn0.node.save()
-        resultatt= result(ldn0.node.Idnode)
-        print (resultatt)
-        ldn0.node.status=resultatt
-        ldn0.node.save()
+    #     fwi = float(FWI)
+    #     ldn0.node.FWI=fwi
+    #     ldn0.node.save()
+    #     resultatt= result(ldn0.node.Idnode)
+    #     print (resultatt)
+    #     ldn0.node.status=resultatt
+    #     ldn0.node.save()
 
            # get the last Node object and save it to the polygon
     #node = Node.objects.order_by('-Idnode').first()
@@ -183,7 +183,7 @@ def stocker_polygone(request, id):
         print(polygonString)
         polygon = GEOSGeometry(polygonString, srid=4326)
         #myPolygon.nom = request.user
-        
+        print(polygon)
         instance = myPolygon(geom=polygon , nom=Prject_name )
         instance.save()
 
@@ -241,9 +241,9 @@ def step_four(request, id):
 
 
         
-        my_project = Project.objects.get(idProject=id)
-        poolygon = my_project.Polygon
-        nodes = Node.objects.filter(polygon=poolygon)
+        # my_project = Project.objects.get(idProject=id)
+        # poolygon = my_project.Polygon
+        # nodes = Node.objects.filter(polygon=poolygon)
        
         
 

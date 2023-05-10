@@ -141,8 +141,10 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet.marker.bouncing/dist/leaflet.marker.bouncing.min.js"></script>
 
  <script>
+  var aaa = "{{ polygon.geom }}";
+  console.log(aaa);
   var geojson_str = "{{ polygon.geom.json|escapejs }}";
-  //console.log(geojson_str);
+  console.log(geojson_str);
   var status = "{{ polygon.status }}";
   var geojson = JSON.parse(geojson_str);
   //console.log(geojson );
@@ -166,7 +168,7 @@
         iconAnchor: [19, 19],
         popupAnchor: [0, -19]
         });
-  
+  console.log("{{ ldn }}")
   {% for d in ldn %}
   
       var coords = JSON.parse(geojson_str).coordinates;
@@ -178,7 +180,7 @@
             coords[0][{{ d.node.range}}]
         ]
       };
-            var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> {{ d.node.status }} <br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>"
+            var latest_data = "<strong>Ref:</strong> {{ d.node.ref }} <br> <strong>RSSI:</strong> {{ d.node.RSSI }} <br> <strong>FWI:</strong> {{ d.node.FWI }} <br> <strong>Predection result:</strong> <span style='color:" + color + ";'>{{ d.node.status }} </span> <br><strong>Detection Result:</strong> {{ d.node.camera }} <br> <br><strong>Temperature:</strong> {{ d.temperature }} <br> <strong>Humidity:</strong> {{ d.humidity }} <br> <strong>Wind_speed:</strong> {{ d.wind }} <br>"
             console.log(latest_data)
             var marker = L.marker([{{ d.node.point.y }}, {{ d.node.point.x }}]).bindPopup(latest_data).addTo(map);   
             

@@ -7,6 +7,13 @@ from signup.models import *
 from .models import *
 import pyowm
 
+# from .status import result
+from .forms import *
+
+import csv 
+from .FWI import *
+from datetime import datetime
+
 topics = ['v3/loraatest02@ttn/devices/eui-70b3d57ed005a5c4/up', 'v3/loraatest02@ttn/devices/eui-70b3d57ed005c92e/up', 'v3/loraatest02@ttn/devices/eui-2cf7f1c044900011/up']
 #print('Connected successfully')
 def on_connect(mqtt_client, userdata, flags, rc):
@@ -77,6 +84,26 @@ def on_message(mqtt_client, userdata, msg):
                     new_data = Data.objects.create(temperature=temperature, humidity=humidity, wind=wind_speed, node=node)
                     #datas.append(new_data)
                     new_data.save()
+
+                    with open('testBatch.csv', mode='a', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerow([datetime.today().strftime('%m/%d/%Y'), temperature, humidity, wind_speed, '0'])
+
+                    batchFWI('testBatch.csv')
+
+                    with open('testBatch.csv', mode='r') as file:
+                        reader = csv.reader(file)
+                        rows = list(reader)
+                        last_row = rows[-1]
+                        FWI = last_row[-1]
+
+                    fwi = float(FWI)
+                    node.FWI=fwi
+                    node.save()
+                    # resultatt= result(node.Idnode)
+                    # print (resultatt)
+                    # node.status=resultatt
+                    # node.save()
 
 
 
